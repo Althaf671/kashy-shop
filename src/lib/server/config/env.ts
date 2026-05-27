@@ -1,0 +1,30 @@
+import { 
+    CLOUDINARY_CLIENT_NAME,
+    CLOUDINARY_CLIENT_ID,
+    CLOUDINARY_CLIENT_SECRET,
+    WHITELIST_EMAIL,
+    GOOGLE_OAUTH_CLIENT_ID,
+    GOOGLE_OAUTH_CLIENT_SECRET,
+    DATABASE_SUPABASE_URL
+} from "$env/static/private";
+import { z } from "zod";
+
+const envSchema = z.object({
+    DATABASE_URL: z.string().min(1),
+    CLOUDINARY_NAME: z.string().min(1),
+    CLOUDINARY_ID: z.string().min(1),
+    CLOUDINARY_SECRET: z.string().min(1),
+    WHITELIST_EMAIL: z.string().min(1),
+    GOOGLE_ID: z.string().min(1),
+    GOOGLE_SECRET: z.string().min(1),
+});
+
+export const ENV = envSchema.parse({
+    DATABASE_URL: DATABASE_SUPABASE_URL,
+    CLOUDINARY_NAME: CLOUDINARY_CLIENT_NAME,
+    CLOUDINARY_ID: CLOUDINARY_CLIENT_ID,
+    CLOUDINARY_SECRET: CLOUDINARY_CLIENT_SECRET,
+    WHITELIST_EMAIL: WHITELIST_EMAIL,
+    GOOGLE_ID: GOOGLE_OAUTH_CLIENT_ID,
+    GOOGLE_SECRET: GOOGLE_OAUTH_CLIENT_SECRET
+});

@@ -1,0 +1,58 @@
+import { ACCEPTED_IMAGE_TYPES, KASH, MAX_FILE_SIZE } from "$lib/global/constant.type";
+import { CATEGORIES_CONSTRAINT, type TCloudinaryImage } from "$lib/server/db/schema.constraints";
+import { z } from "zod";
+
+//--- create -------------------------------------
+export const CreateCategorySchema = z.object({
+    name: z
+        .string()
+        .trim()
+        .min(5, { error: `Minimum 5 characters, ${KASH}.`})
+        .max(CATEGORIES_CONSTRAINT.nameLength, `Maximum ${CATEGORIES_CONSTRAINT.nameLength} characters, ${KASH}.`),
+    description: z
+        .string()
+        .trim()
+        .min(5, { error: `Minimum 5 characters, ${KASH}.`})
+        .max(CATEGORIES_CONSTRAINT.descriptionLength, `Maximum ${CATEGORIES_CONSTRAINT.descriptionLength} characters, ${KASH}.`),
+    thumbnailPicture: z
+        .file()
+        .max(MAX_FILE_SIZE, `Maximum file size is 2MB, ${KASH}.`)
+        .mime(ACCEPTED_IMAGE_TYPES, `File format is must between JPG, JPEG, or WEBP, ${KASH}.`),
+    slug: z
+        .string()
+        .trim()
+        .refine((val) => val.includes("-"), { message: `Slug must contains character '-', ${KASH}.` })
+        .refine((val) => !val.includes(" "), { message: `Slug can't contains space, ${KASH}.` })
+        .min(5, { error: `Minimum 5 characters, ${KASH}.`})
+        .max(CATEGORIES_CONSTRAINT.slugLength,`Maximum ${CATEGORIES_CONSTRAINT.slugLength} characters, ${KASH}.`),
+})
+export type TCreateCategoryRequest = z.infer<typeof CreateCategorySchema>
+export type TCreateCategoryResponse = { id: string; slug: string; }
+
+//--- update by id -------------------------------
+export const UpdateCategoryByIdSchema = z.object({ 
+    id: z.uuid("You did not input a valid UUID."), 
+    data: CreateCategorySchema.partial()
+})
+export type TUpdateCategoryByIdRequest = z.infer<typeof UpdateCategoryByIdSchema>
+export type TUpdateCategoryByIdResponse = TCreateCategoryResponse
+
+//--- delete by id -------------------------------
+export const DeleteCategoryByIdSchema = z.object({ id: z.uuid("You did not input a valid UUID.")})
+export type TDeleteCategoryByIdRequest = z.infer<typeof DeleteCategoryByIdSchema>
+
+//--- get by id ----------------------------------
+export const GetCategoryByIdSchema = z.object({ id: z.uuid("You did not input a valid UUID.")})
+export type TGetCategoryByIdRequest = z.infer<typeof GetCategoryByIdSchema>
+export type TGetCategoryByIdResponse = {
+    id: string;
+    name: string;
+    description: string;
+    thumbnailPicture: TCloudinaryImage;
+    slug: string;
+    updatedAt: Date | null;
+    createdAt: Date | null;
+}
+
+//--- get lookup ---------------------------------
+export type TGetCategoryLookupResponse = Omit<TGetCategoryByIdResponse, 'updatedAt' | 'createdAt'>
