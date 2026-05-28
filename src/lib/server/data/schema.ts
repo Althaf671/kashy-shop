@@ -33,6 +33,7 @@ export const categories = pgTable('categories', {
     name:               varchar('name', { length: CATEGORIES_CONSTRAINT.nameLength }).notNull().unique(),
     description:        varchar('description', { length: CATEGORIES_CONSTRAINT.descriptionLength }).notNull(),
     thumbnailPicture:   jsonb('thumbnail_picture').$type<TCloudinaryImage>().notNull(),
+    isSoftDeleted:      boolean('is_soft_deleted').default(CATEGORIES_CONSTRAINT.isSoftDeleted),
     slug:               varchar('slug', { length: CATEGORIES_CONSTRAINT.slugLength }).notNull().unique(),
     updatedAt:          timestamp('updated_at', { withTimezone: CATEGORIES_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: CATEGORIES_CONSTRAINT.isTimeZone }).defaultNow()
@@ -40,7 +41,7 @@ export const categories = pgTable('categories', {
     {
         singleObjectCheck: check(
             'single_object_check',
-            sql`CHECK (jsonb_typeof(${table.thumbnailPicture}) = 'object' 
+            sql`(jsonb_typeof(${table.thumbnailPicture}) = 'object' 
                 AND jsonb_typeof(${table.thumbnailPicture}) != 'array')`,
         )
     }
@@ -56,11 +57,12 @@ export const products = pgTable('products', {
     stock:              integer('stock').notNull(),
     type:               productTypeEnum('type').notNull().default(PRODUCT_TYPE[0]),
     images:             jsonb('image_urls').$type<TCloudinaryImage[]>().notNull(),
+    isSoftDeleted:      boolean('is_soft_deleted').default(PRODUCTS_CONSTRAINT.isSoftDeleted),
     isActive:           boolean('is_active').default(PRODUCTS_CONSTRAINT.isActive).notNull(),
     updatedAt:          timestamp('updated_at', { withTimezone: PRODUCTS_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: PRODUCTS_CONSTRAINT.isTimeZone }).defaultNow(),
-    categoryId:         uuid('category_id').references(() => categories.id, { onDelete: 'cascade' }).notNull()
-}, (table) => [
+    categoryId:         uuid('category_id').references(() => categories.id, { onDelete: 'no action' }).notNull()
+}, (table) => ([
     {
         priceCheck: check(
             'price_check', 
@@ -74,7 +76,7 @@ export const products = pgTable('products', {
         ),
         singleImageCheck: check(
             'single_image_check',
-            sql`CHECK (jsonb_typeof(${table.thumbnailPicture}) = 'object' 
+            sql`(jsonb_typeof(${table.thumbnailPicture}) = 'object' 
                 AND jsonb_typeof(${table.thumbnailPicture}) != 'array')`,
         ),
         maxImageCheck: check(
@@ -82,7 +84,7 @@ export const products = pgTable('products', {
             sql`jsonb_array_length(${table.images}) <= ${PRODUCTS_CONSTRAINT.imageInputLimit}`
         )
     }
-])
+]))
 
 export const orders = pgTable('orders', {
     id:                 uuid('id').primaryKey().defaultRandom(),
@@ -96,7 +98,7 @@ export const orders = pgTable('orders', {
     updatedAt:          timestamp('updated_at', { withTimezone: ORDER_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: ORDER_CONSTRAINT.isTimeZone }).defaultNow(),
     customerId:         uuid('customer_id').references(() => customers.id, { onDelete: 'restrict'}).notNull()
-}, (table) => [
+}, (table) => ([
     {
         totalPriceCheck: check(
             'total_price_check',
@@ -105,11 +107,11 @@ export const orders = pgTable('orders', {
         ),
         singleObjectCheck: check(
             'single_object_check',
-            sql`CHECK (jsonb_typeof(${table.paymentProof}) = 'object' 
+            sql`(jsonb_typeof(${table.paymentProof}) = 'object' 
                 AND jsonb_typeof(${table.paymentProof}) != 'array')`,
         )
     }
-])
+]))
 
 export const orderItems = pgTable('order_items', {
     id:                 uuid('id').primaryKey().defaultRandom(),
@@ -118,7 +120,7 @@ export const orderItems = pgTable('order_items', {
     priceSnapshot:      integer('price_snapshot').notNull(),
     productId:          uuid('product_id').references(() => products.id, { onDelete: 'set null' }),
     orderId:            uuid('order_id').references(() => orders.id, { onDelete: 'cascade' }).notNull()
-}, (table) => [
+}, (table) => ([
     {
         priceSnapshotCheck: check(
             'price_snapshot_check',
@@ -131,7 +133,7 @@ export const orderItems = pgTable('order_items', {
                 AND ${table.quantity} <= ${ORDERITEMS_CONSTRAINT.quantityRange.max}`
         )
     }
-])
+]))
 
 
 // user tables
@@ -143,15 +145,15 @@ export const users = pgTable('users', {
     avatarPicture:      jsonb('avatar_picture').$type<TCloudinaryImage>().notNull(),
     updatedAt:          timestamp('updated_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow()
-}, (table) => [
+}, (table) => ([
     {
         singleObjectCheck: check(
             'single_object_check',
-            sql`CHECK (jsonb_typeof(${table.avatarPicture}) = 'object' 
+            sql`(jsonb_typeof(${table.avatarPicture}) = 'object' 
                 AND jsonb_typeof(${table.avatarPicture}) != 'array')`,
         )
     }
-])
+]))
 
 export const accounts = pgTable('account', {
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -165,11 +167,11 @@ export const accounts = pgTable('account', {
     scope: varchar('scope'),
     id_token: varchar('id_token'),
     session_state: varchar('session_state'),
-}, (table) => [
+}, (table) => ([
     {
         pk: primaryKey({ columns: [table.provider, table.providerAccountId] }),
     }
-])
+]))
 
 export const sessions = pgTable('session', {
     sessionToken: varchar('session_token').primaryKey(), 

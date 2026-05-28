@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Result } from "$lib/types/global/result.types";
 import { STATUS_CODE } from "$lib/types/global/constant.types";
 import { GetCategoryByIdSchema, type TGetCategoryByIdRequest, type TGetCategoryByIdResponse } from "$lib/types/features";
@@ -27,7 +27,10 @@ export async function getCategorybyIdAsync(data: TGetCategoryByIdRequest)
                 createdAt: categories.createdAt
             })
             .from(categories)
-            .where(eq(categories.id, categoryId))
+            .where(and(
+                eq(categories.id, categoryId),
+                eq(categories.isSoftDeleted, false)
+            ))
              
         if (!queryCategory) 
             return Result.failure({
@@ -36,7 +39,17 @@ export async function getCategorybyIdAsync(data: TGetCategoryByIdRequest)
                 domain: DOMAIN
             })
 
-        return Result.success(queryCategory)
+        const response: TGetCategoryByIdResponse = {
+            id: queryCategory.id,
+            name: queryCategory.name,
+            description: queryCategory.description,
+            thumbnailPicture: queryCategory.thumbnailPicture,
+            slug: queryCategory.slug,
+            updatedAt: queryCategory.updatedAt,
+            createdAt: queryCategory.createdAt
+        }
+
+        return Result.success(response)
     } catch (error: unknown) {
         return Result.serverError(error, DOMAIN)
     }

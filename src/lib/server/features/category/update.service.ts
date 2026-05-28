@@ -1,5 +1,5 @@
 import { Result } from "$lib/types/global/result.types";
-import { and, eq, ne, or } from "drizzle-orm";
+import { and, eq, ilike, ne, or } from "drizzle-orm";
 import { KASH, STATUS_CODE } from "$lib/types/global/constant.types";
 import { deleteFileByPublicIdAsync, findSpecificErrorValues, processAndUploadThumbnailAsync } from "$lib/server/utils";
 import { UpdateCategoryByIdSchema, type TUpdateCategoryByIdRequest, type TUpdateCategoryByIdResponse } from "$lib/types/features";
@@ -22,10 +22,17 @@ export async function updateCategoryByIdAsync(data: TUpdateCategoryByIdRequest)
 
     try {
         const [existingCategory] = await db
-            .select({ id: categories.id, thumbnailPicture: categories.thumbnailPicture })
+            .select({ 
+                id: categories.id, 
+                thumbnailPicture: categories.thumbnailPicture 
+            })
             .from(categories)
-            .where(eq(categories.id, categoryId))
+            .where(and(
+                eq(categories.id, categoryId),
+                eq(categories.isSoftDeleted, false)
+            ))
             .limit(1)
+
         if (!existingCategory) 
             return Result.failure({
                 code: STATUS_CODE.NOT_FOUND,
@@ -37,19 +44,18 @@ export async function updateCategoryByIdAsync(data: TUpdateCategoryByIdRequest)
         prevThumbnail = existingCategory.thumbnailPicture
 
         if (patchData.name !== undefined || patchData.slug !== undefined) {
-            const targetName = patchData.name ?? ""
-            const targetSlug = patchData.slug ?? ""
+            const orConditions =[]
+            if (patchData.name !== undefined) orConditions.push(ilike(categories.name, patchData.name))
+            if (patchData.slug !== undefined) orConditions.push(eq(categories.slug, patchData.slug))
 
             const [isDuplicated] = await db
                 .select({ id: categories.id, name: categories.name, slug: categories.slug })
                 .from(categories)
                 .where(
                     and(
-                        or(
-                            eq(categories.name, targetName),
-                            eq(categories.slug, targetSlug)
-                        ),
-                        ne(categories.id, categoryId)
+                        or(...orConditions),
+                        ne(categories.id, categoryId),
+                        eq(categories.isSoftDeleted, false)
                     )
                 )
                 .limit(1)

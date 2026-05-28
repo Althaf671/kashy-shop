@@ -78,11 +78,11 @@ export type TGetProductByIdResponse = {
     type: TProductType;
     images: TCloudinaryImage[];
     isActive: boolean;
-    updatedAt: Date | undefined;
-    createdAt: Date | undefined;
+    updatedAt: Date | null;
+    createdAt: Date | null;
     categoryParent: {
         id: string;
-        name: string;
+        name: string | null;
     }
 }
 

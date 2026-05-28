@@ -2,6 +2,7 @@ export const CATEGORIES_CONSTRAINT = {
     nameLength: 100,
     descriptionLength: 500,
     thumbnailUrlLength: 2048,
+    isSoftDeleted: false,
     slugLength: 50,
     isTimeZone: true
 } as const;
@@ -20,6 +21,7 @@ export const PRODUCTS_CONSTRAINT = {
         min: 0,
         max: 100
     },
+    isSoftDeleted: false,
     isActive: true,
     isTimeZone: true
 } as const;

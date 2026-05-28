@@ -2,7 +2,7 @@ import { categories, db, products } from "$lib/server/data";
 import { findSpecificErrorValues, processAndUploadThumbnailAsync } from "$lib/server/utils";
 import { CreateProductScheme, type TCreateProductRequest, type TCreateProductResponse } from "$lib/types/features";
 import { KASH, Result, STATUS_CODE } from "$lib/types/global";
-import { and, eq, or } from "drizzle-orm";
+import { and, eq, ilike, or } from "drizzle-orm";
 
 const DOMAIN = "CreateProductService" as const
 
@@ -40,7 +40,7 @@ export async function createProductAsync(data: TCreateProductRequest)
             .where(
                 or(
                     and(
-                        eq(products.name, payload.name),
+                        ilike(products.name, payload.name),
                         eq(products.categoryId, payload.categoryId),
                     ),
                     eq(products.slug, payload.slug)
