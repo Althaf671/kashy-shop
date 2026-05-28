@@ -1,6 +1,6 @@
-import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "$lib/global/constant.type";
-import { ORDER_STATUS, PAYMENT_METHOD, type TOrderStatus, type TPaymentMethod } from "$lib/global/shared.types";
-import { ORDER_CONSTRAINT, ORDERITEMS_CONSTRAINT, type TCloudinaryImage } from "$lib/server/db/schema.constraints";
+import { ORDER_CONSTRAINT, ORDERITEMS_CONSTRAINT } from "$lib/server/data";
+import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "$lib/types/global/constant.types";
+import { ORDER_STATUS, PAYMENT_METHOD, type TCloudinaryImage, type TOrderStatus, type TPaymentMethod } from "$lib/types/global/shared.types";
 import { z } from "zod";
 
 // ORDER ITEMS

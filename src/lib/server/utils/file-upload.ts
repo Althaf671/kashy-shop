@@ -1,9 +1,7 @@
-import { FOLDER_NAME } from "$lib/global/constant.type";
-import { Result } from "$lib/global/shared.types";
 import type { UploadApiResponse } from "cloudinary";
-import { cloudinary } from "../config/cloudinary";
-import type { TCloudinaryImage } from "../db/schema.constraints";
 import type { UploadApiErrorResponse } from "cloudinary";
+import { cloudinary } from "../config/cloudinary";
+import { FOLDER_NAME, Result, type TCloudinaryImage } from "$lib/types/global";
 
 export async function uploadFileAsync(buffer: Buffer)
     : Promise<Result<TCloudinaryImage>>

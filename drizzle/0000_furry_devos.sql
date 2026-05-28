@@ -71,7 +71,7 @@ CREATE TABLE "products" (
 	"stock" integer NOT NULL,
 	"type" "product_type" DEFAULT 'pre_order' NOT NULL,
 	"image_urls" jsonb NOT NULL,
-	"is_active" boolean DEFAULT true,
+	"is_active" boolean DEFAULT true NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"created_at" timestamp with time zone DEFAULT now(),
 	"category_id" uuid NOT NULL,

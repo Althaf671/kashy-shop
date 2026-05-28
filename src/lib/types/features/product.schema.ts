@@ -1,6 +1,6 @@
-import { ACCEPTED_IMAGE_TYPES, KASH, MAX_FILE_SIZE, type TAcceptedImages } from "$lib/global/constant.type";
-import { PRODUCT_TYPE, type TProductType } from "$lib/global/shared.types";
-import { PRODUCTS_CONSTRAINT, type TCloudinaryImage } from "$lib/server/db/schema.constraints";
+import { PRODUCTS_CONSTRAINT } from "$lib/server/data";
+import { ACCEPTED_IMAGE_TYPES, KASH, MAX_FILE_SIZE, type TAcceptedImages } from "$lib/types/global/constant.types";
+import { PRODUCT_TYPE, type TCloudinaryImage, type TProductType } from "$lib/types/global/shared.types";
 import { z } from "zod";
 
 //--- create -------------------------------------
@@ -12,7 +12,6 @@ export const CreateProductScheme = z.object({
         .max(PRODUCTS_CONSTRAINT.nameLength, `Maximum ${PRODUCTS_CONSTRAINT.nameLength} characters, ${KASH}.`),
     description: z
         .string()
-        .trim()
         .min(5, { error: `Minimum 5 characters, ${KASH}.`})
         .max(PRODUCTS_CONSTRAINT.descriptionLength, `Maximum ${PRODUCTS_CONSTRAINT.descriptionLength} characters, ${KASH}.`),
     thumbnailPicture: z
@@ -27,13 +26,13 @@ export const CreateProductScheme = z.object({
         .min(5, { error: `Minimum 5 characters, ${KASH}.`})
         .max(PRODUCTS_CONSTRAINT.slugLength, `Maximum ${PRODUCTS_CONSTRAINT.slugLength} characters, ${KASH}.`),
     price: z
-        .int()
+        .coerce.number()
         .min(PRODUCTS_CONSTRAINT.priceRange.min, 
             { error: `You can not input any number below ${PRODUCTS_CONSTRAINT.priceRange.min}, ${KASH}.`})
         .max(PRODUCTS_CONSTRAINT.priceRange.max, 
             { error: `You can not input stock value above ${PRODUCTS_CONSTRAINT.priceRange.max}, ${KASH}.`}),
     stock: z
-        .int()
+        .coerce.number()
         .min(PRODUCTS_CONSTRAINT.stockRange.min, 
             { error: `You can not input any number below ${PRODUCTS_CONSTRAINT.stockRange.min}, ${KASH}.`})
         .max(PRODUCTS_CONSTRAINT.stockRange.max, 
@@ -47,7 +46,7 @@ export const CreateProductScheme = z.object({
             files.every((file) => file.size <= MAX_FILE_SIZE, `Maximum file size is 2MB, ${KASH}.`))
         .refine((files) => 
             files.every((file) => ACCEPTED_IMAGE_TYPES.includes(file.type as TAcceptedImages), `File format is must between JPG, JPEG, or WEBP, ${KASH}.`)),
-    isActive: z.boolean("You did not input a parameter with type of boolean."),
+    isActive: z.boolean("You did not input a parameter with type of boolean.").default(true),
     categoryId: z.uuid("You did not input a valid UUID."), 
 })
 export type TCreateProductRequest = z.infer<typeof CreateProductScheme>

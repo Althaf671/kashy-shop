@@ -1,8 +1,3 @@
-export type TCloudinaryImage = {
-    publicId: string;
-    imageUrl: string;
-}
-
 export const CATEGORIES_CONSTRAINT = {
     nameLength: 100,
     descriptionLength: 500,

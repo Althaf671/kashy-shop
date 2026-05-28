@@ -1,5 +1,5 @@
-import { KASH } from "$lib/global/constant.type";
-import { CUSTOMERS_CONSTRAINT } from "$lib/server/db/schema.constraints";
+import { CUSTOMERS_CONSTRAINT } from "$lib/server/data";
+import { KASH } from "$lib/types/global/constant.types";
 import { z } from "zod";
 
 //--- create -------------------------------------
@@ -30,9 +30,9 @@ export type TGetCustomerByIdResponse = {
     id: string;
     name: string;
     phone: string;
-    instagramUrl: string;
-    updatedAt: Date;
-    createdAt: Date;
+    instagramUrl: string | null;
+    updatedAt: Date | null;
+    createdAt: Date | null;
 }
 
 //--- get lookup ---------------------------------

@@ -1,4 +1,4 @@
-import { ORDER_STATUS, PAYMENT_METHOD, PRODUCT_TYPE } from "$lib/global/shared.types";
+import { ORDER_STATUS, PAYMENT_METHOD, PRODUCT_TYPE, type TCloudinaryImage } from "$lib/types/global/shared.types";
 import { 
     boolean, 
     check, 
@@ -17,7 +17,6 @@ import {
     ORDERITEMS_CONSTRAINT, 
     PRODUCTS_CONSTRAINT, 
     USERS_CONSTRAINT, 
-    type TCloudinaryImage 
 } from "./schema.constraints";
 import { sql } from "drizzle-orm";
 
@@ -37,7 +36,7 @@ export const categories = pgTable('categories', {
     slug:               varchar('slug', { length: CATEGORIES_CONSTRAINT.slugLength }).notNull().unique(),
     updatedAt:          timestamp('updated_at', { withTimezone: CATEGORIES_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: CATEGORIES_CONSTRAINT.isTimeZone }).defaultNow()
-}, (table) => ([
+}, (table) => [
     {
         singleObjectCheck: check(
             'single_object_check',
@@ -45,7 +44,7 @@ export const categories = pgTable('categories', {
                 AND jsonb_typeof(${table.thumbnailPicture}) != 'array')`,
         )
     }
-]))
+])
 
 export const products = pgTable('products', {
     id:                 uuid('id').primaryKey().defaultRandom(),
@@ -56,12 +55,12 @@ export const products = pgTable('products', {
     price:              integer('price').notNull(),
     stock:              integer('stock').notNull(),
     type:               productTypeEnum('type').notNull().default(PRODUCT_TYPE[0]),
-    images:             jsonb('image_urls').$type<TCloudinaryImage>().notNull(),
-    isActive:           boolean('is_active').default(PRODUCTS_CONSTRAINT.isActive),
+    images:             jsonb('image_urls').$type<TCloudinaryImage[]>().notNull(),
+    isActive:           boolean('is_active').default(PRODUCTS_CONSTRAINT.isActive).notNull(),
     updatedAt:          timestamp('updated_at', { withTimezone: PRODUCTS_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: PRODUCTS_CONSTRAINT.isTimeZone }).defaultNow(),
     categoryId:         uuid('category_id').references(() => categories.id, { onDelete: 'cascade' }).notNull()
-}, (table) => ([
+}, (table) => [
     {
         priceCheck: check(
             'price_check', 
@@ -83,7 +82,7 @@ export const products = pgTable('products', {
             sql`jsonb_array_length(${table.images}) <= ${PRODUCTS_CONSTRAINT.imageInputLimit}`
         )
     }
-]))
+])
 
 export const orders = pgTable('orders', {
     id:                 uuid('id').primaryKey().defaultRandom(),
@@ -97,7 +96,7 @@ export const orders = pgTable('orders', {
     updatedAt:          timestamp('updated_at', { withTimezone: ORDER_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: ORDER_CONSTRAINT.isTimeZone }).defaultNow(),
     customerId:         uuid('customer_id').references(() => customers.id, { onDelete: 'restrict'}).notNull()
-}, (table) => ([
+}, (table) => [
     {
         totalPriceCheck: check(
             'total_price_check',
@@ -110,7 +109,7 @@ export const orders = pgTable('orders', {
                 AND jsonb_typeof(${table.paymentProof}) != 'array')`,
         )
     }
-]))
+])
 
 export const orderItems = pgTable('order_items', {
     id:                 uuid('id').primaryKey().defaultRandom(),
@@ -119,7 +118,7 @@ export const orderItems = pgTable('order_items', {
     priceSnapshot:      integer('price_snapshot').notNull(),
     productId:          uuid('product_id').references(() => products.id, { onDelete: 'set null' }),
     orderId:            uuid('order_id').references(() => orders.id, { onDelete: 'cascade' }).notNull()
-}, (table) => ([
+}, (table) => [
     {
         priceSnapshotCheck: check(
             'price_snapshot_check',
@@ -132,7 +131,7 @@ export const orderItems = pgTable('order_items', {
                 AND ${table.quantity} <= ${ORDERITEMS_CONSTRAINT.quantityRange.max}`
         )
     }
-]))
+])
 
 
 // user tables
@@ -144,7 +143,7 @@ export const users = pgTable('users', {
     avatarPicture:      jsonb('avatar_picture').$type<TCloudinaryImage>().notNull(),
     updatedAt:          timestamp('updated_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow()
-}, (table) => ([
+}, (table) => [
     {
         singleObjectCheck: check(
             'single_object_check',
@@ -152,7 +151,7 @@ export const users = pgTable('users', {
                 AND jsonb_typeof(${table.avatarPicture}) != 'array')`,
         )
     }
-]))
+])
 
 export const accounts = pgTable('account', {
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -166,11 +165,11 @@ export const accounts = pgTable('account', {
     scope: varchar('scope'),
     id_token: varchar('id_token'),
     session_state: varchar('session_state'),
-}, (table) => ([
+}, (table) => [
     {
         pk: primaryKey({ columns: [table.provider, table.providerAccountId] }),
     }
-]));
+])
 
 export const sessions = pgTable('session', {
     sessionToken: varchar('session_token').primaryKey(), 

@@ -1,6 +1,7 @@
-import { ACCEPTED_IMAGE_TYPES, KASH, MAX_FILE_SIZE } from "$lib/global/constant.type";
-import { CATEGORIES_CONSTRAINT, type TCloudinaryImage } from "$lib/server/db/schema.constraints";
+import { ACCEPTED_IMAGE_TYPES, KASH, MAX_FILE_SIZE } from "$lib/types/global/constant.types";
 import { z } from "zod";
+import type { TCloudinaryImage } from "../global";
+import { CATEGORIES_CONSTRAINT } from "$lib/server/data";
 
 //--- create -------------------------------------
 export const CreateCategorySchema = z.object({

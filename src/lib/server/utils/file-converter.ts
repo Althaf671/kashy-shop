@@ -1,5 +1,5 @@
-import { MAX_RESIZE_DIMENSION } from "$lib/global/constant.type";
-import { Result } from "$lib/global/shared.types";
+import { MAX_RESIZE_DIMENSION } from "$lib/types/global/constant.types";
+import { Result } from "$lib/types/global/result.types";
 import sharp from "sharp";
 
 export async function convertToWebpAsync(file: File)
