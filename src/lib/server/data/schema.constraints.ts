@@ -63,5 +63,6 @@ export const CUSTOMERS_CONSTRAINT = {
     nameLength: 100,
     phoneLength: 30,
     instagramUrl: 2048,
+    isSoftDeleted: false,
     isTimeZone: true
 } as const;

@@ -1,6 +1,7 @@
 import { Result } from "$lib/types/global/result.types";
 import type { TGetCategoryLookupResponse } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
+import { eq } from "drizzle-orm";
 
 const DOMAIN = "GetCategoryLookupListService" as const
 
@@ -18,6 +19,7 @@ export async function getCategoryLookupListAsync()
                 slug: categories.slug
             })
             .from(categories)
+            .where(eq(categories.isSoftDeleted, false))
 
         const response: TGetCategoryLookupResponse[] = queryCategory.map((category) => ({
             id: category.id,

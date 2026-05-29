@@ -184,6 +184,7 @@ export const customers = pgTable('customers', {
     name:               varchar('name', { length: CUSTOMERS_CONSTRAINT.nameLength }).notNull(),
     phone:              varchar('phone_number', { length: CUSTOMERS_CONSTRAINT.phoneLength }).notNull().unique(),
     instagramUrl:       varchar('instagram_url', { length: CUSTOMERS_CONSTRAINT.instagramUrl }),
+    isSoftDeleted:      boolean('is_soft_deleted').default(CUSTOMERS_CONSTRAINT.isSoftDeleted),
     updatedAt:          timestamp('updated_at', { withTimezone: CUSTOMERS_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: CUSTOMERS_CONSTRAINT.isTimeZone }).defaultNow()
 })

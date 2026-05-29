@@ -11,28 +11,49 @@ export async function createCustomerAsync(data: TCreateCustomerRequest)
     const validation = CreateCustomerScheme.safeParse(data)
     if (!validation.success) return Result.validationFailure(validation.error, DOMAIN)
 
-    const { name, phone, instagramUrl } = validation.data
+    const payload = validation.data
 
     try {
         const [isPhoneExist] = await db
-            .select({ id: customers.id })
+            .select({ id: customers.id, isSoftDeleted: customers.isSoftDeleted })
             .from(customers)
-            .where(eq(customers.phone, phone))
+            .where(eq(customers.phone, payload.phone))
             .limit(1)
         
-        if (isPhoneExist) 
-            return Result.failure({
-                code: STATUS_CODE.DUPLICATED,
-                description: `Phone number ${phone} is already exist, use another one.`,
-                domain: DOMAIN
-            })
+        if (isPhoneExist) {
+            if (!isPhoneExist.isSoftDeleted) {
+                return Result.failure({
+                    code: STATUS_CODE.DUPLICATED,
+                    description: `Phone number ${payload.phone} is already exist, use another one.`,
+                    domain: DOMAIN
+                })
+            }
+
+            const [restoreCustomer] = await db
+                .update(customers)
+                .set({
+                    name: payload.name,
+                    instagramUrl: payload.instagramUrl,
+                    isSoftDeleted: false,
+                    updatedAt: new Date()
+                })
+                .where(eq(customers.id, isPhoneExist.id))
+                .returning()
+
+            const response: TCreateCustomerResponse = {
+                id: restoreCustomer.id,
+                name: restoreCustomer.name
+            }
+
+            return Result.success(response)
+        }
 
         const [insertedCustomer] = await db
             .insert(customers)
             .values({
-                name: name,
-                phone: phone,
-                instagramUrl: instagramUrl
+                name: payload.name,
+                phone: payload.phone,
+                instagramUrl: payload.instagramUrl
             })
             .returning()
         

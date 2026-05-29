@@ -1,6 +1,7 @@
 import { customers, db } from "$lib/server/data";
 import type { TGetCustomerLookupResponse } from "$lib/types/features";
 import { Result } from "$lib/types/global";
+import { eq } from "drizzle-orm";
 
 const DOMAIN = "GetCustomerLookupService" as const
 
@@ -16,6 +17,7 @@ export async function getCustomerLookupListAsync()
                 instagramUrl: customers.instagramUrl 
             })
             .from(customers)
+            .where(eq(customers.isSoftDeleted, false))
 
         const response: TGetCustomerLookupResponse[] = queryCustomer.map((customer) => ({
             id: customer.id,

@@ -1,7 +1,7 @@
 import { categories, db, products } from "$lib/server/data";
 import { GetProductByIdScheme, type TGetProductByIdRequest, type TGetProductByIdResponse } from "$lib/types/features";
 import { Result, STATUS_CODE } from "$lib/types/global";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 const DOMAIN = "GetProductDetailsByIdService"
 
@@ -36,10 +36,16 @@ export async function getProductbyIdAsync(data: TGetProductByIdRequest)
                 }
             })
             .from(products)
-            .leftJoin(categories, eq(categories.id, products.categoryId))
-            .where(eq(products.id, productId))
+            .leftJoin(categories, and(
+                eq(categories.id, products.categoryId),
+                eq(categories.isSoftDeleted, false)
+            ))
+            .where(and(
+                eq(products.id, productId),
+                eq(products.isSoftDeleted, false)
+            ))
         
-        if (!queryProduct || queryProduct.isSoftDeleted)
+        if (!queryProduct)
             return Result.failure({
                 code: STATUS_CODE.NOT_FOUND,
                 description: `Product with ID: ${productId} not found.`,

@@ -1,7 +1,7 @@
 import { customers, db } from "$lib/server/data";
 import { GetCustomerByIdScheme, type TGetCustomerByIdRequest, type TGetCustomerByIdResponse } from "$lib/types/features";
 import { Result, STATUS_CODE } from "$lib/types/global";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 const DOMAIN = "GetCustomerByIdService" as const
 
@@ -24,7 +24,10 @@ export async function getCustomerByIdAsync(data: TGetCustomerByIdRequest)
                 createdAt: customers.createdAt
             })
             .from(customers)
-            .where(eq(customers.id, customerId))
+            .where(and(
+                eq(customers.id, customerId),
+                eq(customers.isSoftDeleted, false)
+            ))
             .limit(1)
 
         if (!queryCustomer)

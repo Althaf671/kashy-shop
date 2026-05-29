@@ -1,7 +1,7 @@
 import { categories, db, products } from "$lib/server/data";
 import type { TGetProductLookupResponse } from "$lib/types/features";
 import { Result } from "$lib/types/global";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 const DOMAIN = "GetProductLookupService" as const
 
@@ -21,7 +21,6 @@ export async function getProductListAsync()
                 stock: products.stock,
                 type: products.type,
                 images: products.images,
-                isSoftDeleted: products.isSoftDeleted,
                 isActive: products.isActive,
                 categoryParent: {
                     id: products.categoryId,
@@ -29,7 +28,10 @@ export async function getProductListAsync()
                 }
             })
             .from(products)
-            .leftJoin(categories, eq(categories.id, products.categoryId))
+            .leftJoin(categories, and(
+                eq(categories.id, products.categoryId),
+                eq(categories.isSoftDeleted, false)
+            ))
             .where(eq(products.isSoftDeleted, false))
 
         const response: TGetProductLookupResponse[] = queryProduct.map((product) => ({

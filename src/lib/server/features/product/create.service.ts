@@ -19,7 +19,10 @@ export async function createProductAsync(data: TCreateProductRequest)
         const [isCategoryExist] = await db
             .select({ id: categories.id })
             .from(categories)
-            .where(eq(categories.id, payload.categoryId))
+            .where(and(
+                eq(categories.id, payload.categoryId),
+                eq(categories.isSoftDeleted, false)
+            ))
             .limit(1)
 
         if (!isCategoryExist)
@@ -37,7 +40,8 @@ export async function createProductAsync(data: TCreateProductRequest)
                 slug: products.slug 
             })
             .from(products)
-            .where(
+            .where(and(
+                eq(products.isSoftDeleted, false),
                 or(
                     and(
                         ilike(products.name, payload.name),
@@ -45,7 +49,7 @@ export async function createProductAsync(data: TCreateProductRequest)
                     ),
                     eq(products.slug, payload.slug)
                 )
-            )
+            ))
             .limit(1)
 
         if (isProductExist) {

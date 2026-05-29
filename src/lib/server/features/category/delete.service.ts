@@ -16,11 +16,13 @@ export async function deleteCategoryByIdAsync(data: TDeleteCategoryByIdRequest)
     const { id: categoryId } = validation.data;
     
     try {
+        const now = Date.now().toString()
+
         const [deletedCategory] = await db
             .update(categories)
             .set({ 
-                name: sql`${categories.name} || '-deleted-' || ${Date.now().toString()}`,
-                slug: sql`${categories.slug} || '-deleted-' || ${Date.now().toString()}`,
+                name: sql`${categories.name} || '-deleted-' || ${now}`,
+                slug: sql`${categories.slug} || '-deleted-' || ${now}`,
                 isSoftDeleted: true
             })
             .where(and(
