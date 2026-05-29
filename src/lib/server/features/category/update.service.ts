@@ -15,9 +15,6 @@ export async function updateCategoryByIdAsync(data: TUpdateCategoryByIdRequest)
     const validation = UpdateCategoryByIdSchema.safeParse(data)
     if (!validation.success) return Result.validationFailure(validation.error, DOMAIN)
 
-    // temp var for rollback
-    let prevThumbnail: TCloudinaryImage 
-    let thumbnailMetadata: TCloudinaryImage | undefined = undefined
     const { id: categoryId, data: patchData } = validation.data;
 
     try {
@@ -40,8 +37,8 @@ export async function updateCategoryByIdAsync(data: TUpdateCategoryByIdRequest)
                 domain: DOMAIN
             })
 
-        // assign prev thumbnail
-        prevThumbnail = existingCategory.thumbnailPicture
+        // temp var for rollback
+        let prevThumbnail: TCloudinaryImage | undefined = undefined
 
         if (patchData.name !== undefined || patchData.slug !== undefined) {
             const orConditions =[]
@@ -87,24 +84,18 @@ export async function updateCategoryByIdAsync(data: TUpdateCategoryByIdRequest)
                 ...(patchData.name !== undefined && { name: patchData.name }),
                 ...(patchData.description !== undefined && { description: patchData.description }),
                 ...(patchData.slug !== undefined && { slug: patchData.slug }),
-                ...(thumbnailMetadata !== undefined && {
-                    thumbnailPicture: {
-                        publicId: thumbnailMetadata.publicId,
-                        imageUrl: thumbnailMetadata.imageUrl
-                    }
-                }),
+                ...(thumbnailMetadata !== undefined && { thumbnailPicture: thumbnailMetadata }),
                 updatedAt: new Date()
             })
             .where(eq(categories.id, categoryId))
             .returning()
 
-        if (!updatedCategory) {
+        if (!updatedCategory) 
             return Result.failure({
                 code: STATUS_CODE.NOT_FOUND,
                 description: `Category with ID: ${categoryId} not found.`,
                 domain: DOMAIN
             })
-        }
 
         if (prevThumbnail && thumbnailMetadata !== undefined) 
             await deleteFileByPublicIdAsync(prevThumbnail.publicId).catch((error) => {

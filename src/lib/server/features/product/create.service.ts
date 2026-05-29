@@ -1,7 +1,7 @@
 import { categories, db, products } from "$lib/server/data";
-import { findSpecificErrorValues, processAndUploadThumbnailAsync } from "$lib/server/utils";
+import { deleteFileByPublicIdAsync, findSpecificErrorValues, processAndUploadThumbnailAsync } from "$lib/server/utils";
 import { CreateProductScheme, type TCreateProductRequest, type TCreateProductResponse } from "$lib/types/features";
-import { KASH, Result, STATUS_CODE } from "$lib/types/global";
+import { KASH, Result, STATUS_CODE, type TCloudinaryImage } from "$lib/types/global";
 import { and, eq, ilike, or } from "drizzle-orm";
 
 const DOMAIN = "CreateProductService" as const
@@ -15,7 +15,11 @@ export async function createProductAsync(data: TCreateProductRequest)
 
     const payload = validation.data
 
+    let finalThumbnail: TCloudinaryImage | undefined = undefined
+    let finalImages: TCloudinaryImage[] = []
+
     try {
+        // check is targeted category is actually exist.
         const [isCategoryExist] = await db
             .select({ id: categories.id })
             .from(categories)
@@ -24,7 +28,6 @@ export async function createProductAsync(data: TCreateProductRequest)
                 eq(categories.isSoftDeleted, false)
             ))
             .limit(1)
-
         if (!isCategoryExist)
             return Result.failure({
                 code: STATUS_CODE.NOT_FOUND,
@@ -32,6 +35,8 @@ export async function createProductAsync(data: TCreateProductRequest)
                 domain: DOMAIN
             })
 
+        // check if there any product with same slug exist and product with same name
+        // from same category exist.
         const [isProductExist] = await db
             .select({ 
                 id: products.id,
@@ -51,7 +56,6 @@ export async function createProductAsync(data: TCreateProductRequest)
                 )
             ))
             .limit(1)
-
         if (isProductExist) {
             const specificReason = findSpecificErrorValues(
                 { ori: isProductExist.categoryId, current: payload.categoryId },
@@ -67,7 +71,7 @@ export async function createProductAsync(data: TCreateProductRequest)
             })
         }
 
-        // parallel task
+        // parallel upload thumbnail and images.
         const thumbnailTask = processAndUploadThumbnailAsync(payload.thumbnailPicture)
         const imageTasks = payload.images.map((file) => processAndUploadThumbnailAsync(file))
 
@@ -81,8 +85,8 @@ export async function createProductAsync(data: TCreateProductRequest)
         const failedImageUpload = imageMetadas.find(res => res.isFailure)
         if (failedImageUpload) return Result.failure(failedImageUpload.error)
 
-        const finalThumbnail = thumbnailMetadata.value!
-        const finalImages = imageMetadas.map(res => res.value!)
+        finalThumbnail = thumbnailMetadata.value!
+        finalImages = imageMetadas.map(res => res.value!)
 
         const [createdProduct] = await db
             .insert(products)
@@ -108,6 +112,19 @@ export async function createProductAsync(data: TCreateProductRequest)
 
         return Result.success(response)
     } catch (error: unknown) {
+        // if somehow database crashed while creating, remove the new thumbnail and images from storage.
+        if (finalThumbnail !== undefined) 
+            await deleteFileByPublicIdAsync(finalThumbnail.publicId).catch((error) => {
+                console.warn("[WARNING]: Failed to delete previoud image", error)
+            })
+
+        if (finalImages.length > 0)
+            await Promise.all(
+                finalImages.map((file) => deleteFileByPublicIdAsync(file.publicId).catch((error) => {
+                    console.warn("[WARNING]: Failed to delete one or more previous images.", error)
+                }))
+            )
+
         return Result.serverError(error, DOMAIN)
     }
 }

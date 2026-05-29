@@ -2,16 +2,16 @@ import { Result, type TCloudinaryImage } from "$lib/types/global";
 import { convertToWebpAsync } from "./file-converter";
 import { uploadFileAsync } from "./file-upload";
 
-export async function processAndUploadThumbnailAsync(rawFile: File): Promise<Result<TCloudinaryImage>> {
-    const webpThumbnail = await convertToWebpAsync(rawFile)
-    if (webpThumbnail.isFailure) {
-        return Result.failure(webpThumbnail.error)
+export async function processAndUploadImageAsync(rawFile: File): Promise<Result<TCloudinaryImage>> {
+    const webpImages = await convertToWebpAsync(rawFile)
+    if (webpImages.isFailure) {
+        return Result.failure(webpImages.error)
     }
 
-    const thumbnailMetadata = await uploadFileAsync(webpThumbnail.value)
-    if (thumbnailMetadata.isFailure) {
-        return Result.failure(thumbnailMetadata.error)
+    const imagesMetadata = await uploadFileAsync(webpImages.value)
+    if (imagesMetadata.isFailure) {
+        return Result.failure(imagesMetadata.error)
     }
 
-    return Result.success(thumbnailMetadata.value)
+    return Result.success(imagesMetadata.value)
 }
