@@ -1,6 +1,6 @@
 import { PRODUCTS_CONSTRAINT } from "$lib/server/data";
 import { ACCEPTED_IMAGE_TYPES, KASH, MAX_FILE_SIZE, type TAcceptedImages } from "$lib/types/global/constant.types";
-import { PRODUCT_TYPE, type TCloudinaryImage, type TProductType } from "$lib/types/global/shared.types";
+import { PRODUCT_TYPE, type TCloudinaryFile, type TProductType } from "$lib/types/global/shared.types";
 import { z } from "zod";
 
 //--- create -------------------------------------
@@ -71,12 +71,12 @@ export type TGetProductByIdResponse = {
     id: string;
     name: string;
     description: string;
-    thumbnailPicture: TCloudinaryImage;
+    thumbnailPicture: TCloudinaryFile;
     slug: string;
     price: number;
     stock: number;
     type: TProductType;
-    images: TCloudinaryImage[];
+    images: TCloudinaryFile[];
     isActive: boolean;
     updatedAt: Date | null;
     createdAt: Date | null;

@@ -1,9 +1,9 @@
 import Google from "@auth/core/providers/google";
 import { SvelteKitAuth } from "@auth/sveltekit";
-import { ENV } from "./env";
+import { ENV } from "../general/env";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { db } from "../db/db";
 import { dev } from "$app/environment";
+import { db } from "../../data/db";
 
 export const { handle, signIn, signOut } = SvelteKitAuth({
     adapter: DrizzleAdapter(db),

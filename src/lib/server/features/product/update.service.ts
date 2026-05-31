@@ -1,7 +1,7 @@
 import { and, eq, ilike, ne, notInArray } from "drizzle-orm";
 import { db, orderItems, orders, products } from "$lib/server/data";
-import { Result, STATUS_CODE, type TCloudinaryImage } from "$lib/types/global";
-import { deleteFileByPublicIdAsync, processAndUploadImageAsync } from "$lib/server/utils";
+import { Result, STATUS_CODE, type TCloudinaryFile } from "$lib/types/global";
+import { cleanupPreviousFileAsync, processAndUploadMultiImagesAsync } from "$lib/server/utils";
 import { UpdateProductByIdScheme, type TUpdateProductByIdRequest, type TUpdateProductByIdResponse } from "$lib/types/features";
 
 //--- update by id -------------------------------
@@ -15,14 +15,14 @@ export async function updateProductByIdAsync(data: TUpdateProductByIdRequest)
 
     const { id: productId, data: patchData } = validation.data
 
-    let prevThumbnail: TCloudinaryImage | undefined = undefined
-    let prevImages: TCloudinaryImage[] = []
+    let prevThumbnail: TCloudinaryFile | undefined = undefined
+    let prevImages: TCloudinaryFile[] = []
 
-    let finalThumbnail: TCloudinaryImage | undefined = undefined
-    let finalImages: TCloudinaryImage[] = []
+    let finalThumbnail: TCloudinaryFile | undefined = undefined
+    let finalImages: TCloudinaryFile[] = []
 
     try {
-        const existingProduct = await findExistingProductByIdAsync(productId)
+        const existingProduct = await checkProductAvailabilityAsync(productId)
         if (existingProduct.isFailure) return Result.failure(existingProduct.error)
 
         const isProductInActive = await isProductInActiveOrdersAsync(productId)
@@ -33,9 +33,11 @@ export async function updateProductByIdAsync(data: TUpdateProductByIdRequest)
             if (isSlugDuplicated.isFailure) return Result.failure(isSlugDuplicated.error)
         }
 
-        if (patchData.name !== undefined) {
-            const categoryId = existingProduct.value.categoryId
-            const isNameDuplicated = await isNameDuplicatedInCategoryAsync(productId, categoryId, patchData.name)
+        const resolvedCategoryId = patchData.categoryId ?? existingProduct.value.categoryId
+        const resolvedName = patchData.name ?? existingProduct.value.name
+        
+        if (patchData.name !== undefined || patchData.categoryId !== undefined) {
+            const isNameDuplicated = await isNameDuplicatedInCategoryAsync(productId, resolvedCategoryId, resolvedName)
             if (isNameDuplicated.isFailure) return Result.failure(isNameDuplicated.error)
         }
 
@@ -58,7 +60,6 @@ export async function updateProductByIdAsync(data: TUpdateProductByIdRequest)
             }
         }
 
-        // update product
         const [updatedProduct] = await db
             .update(products)
             .set({
@@ -93,20 +94,22 @@ export async function updateProductByIdAsync(data: TUpdateProductByIdRequest)
 
 //--- helper -------------------------------------
 // find existing product
-async function findExistingProductByIdAsync(productId: string)
+async function checkProductAvailabilityAsync(productId: string)
     : Promise<Result<{
         isActive: boolean,
-        thumbnailPicture: TCloudinaryImage,
-        images: TCloudinaryImage[],
-        categoryId: string
+        thumbnailPicture: TCloudinaryFile,
+        images: TCloudinaryFile[],
+        categoryId: string,
+        name: string
     }>> 
 {
-    const [existingProduct] = await db
+    const [productRecord] = await db
         .select({ 
             isActive: products.isActive,
             thumbnailPicture: products.thumbnailPicture,
             images: products.images,
-            categoryId: products.categoryId
+            categoryId: products.categoryId,
+            name: products.name
         })
         .from(products)
         .where(and(
@@ -115,7 +118,7 @@ async function findExistingProductByIdAsync(productId: string)
         ))
         .limit(1)
 
-    if (!existingProduct) 
+    if (!productRecord) 
         return Result.failure({
             code: STATUS_CODE.NOT_FOUND,
             description: `Product with ID: ${productId} not found.`,
@@ -123,10 +126,11 @@ async function findExistingProductByIdAsync(productId: string)
         })
 
     return Result.success({
-        isActive: existingProduct.isActive,
-        thumbnailPicture: existingProduct.thumbnailPicture,
-        images: existingProduct.images,
-        categoryId: existingProduct.categoryId
+        isActive: productRecord.isActive,
+        thumbnailPicture: productRecord.thumbnailPicture,
+        images: productRecord.images,
+        categoryId: productRecord.categoryId,
+        name: productRecord.name
     })
 }
 
@@ -147,7 +151,7 @@ async function isProductInActiveOrdersAsync(productId: string)
     if (isProductOnActiveOrder)
         return Result.failure({
             code: STATUS_CODE.FORBIDDEN,
-            description: `Cannot delete this product because there are active, unconfirmed customer orders associated with it.`,
+            description: `Cannot update this product because there are active, unconfirmed customer orders associated with it.`,
             domain: DOMAIN
         })
 
@@ -183,13 +187,12 @@ async function isSlugDuplicatedAsync(productId: string, slug: string)
 async function isNameDuplicatedInCategoryAsync(productId: string, categoryId: string, name: string) 
     : Promise<Result<boolean>>
 {
-    const targetCategoryId = categoryId
     const [isDuplicated] = await db
         .select({ id: products.id })
         .from(products)
         .where(and(
             ilike(products.name, name),
-            eq(products.categoryId, targetCategoryId),
+            eq(products.categoryId, categoryId),
             ne(products.id, productId),
             eq(products.isSoftDeleted, false)
         ))
@@ -198,56 +201,9 @@ async function isNameDuplicatedInCategoryAsync(productId: string, categoryId: st
     if (isDuplicated)
         return Result.failure({
             code: STATUS_CODE.BAD_REQUEST,
-            description: ``,
+            description: `Product with name: ${name} is already exist in this category.`,
             domain: DOMAIN
         })
-
-    return Result.success(true)
-}
-
-// multiple file upload
-async function processAndUploadMultiImagesAsync(thumbnail?: File, images?: File[])
-    : Promise<Result<{ thumbnailResult: TCloudinaryImage | undefined , imagesResult: TCloudinaryImage[] }>> 
-{
-    const thumbnailTask = thumbnail !== undefined
-        ? processAndUploadImageAsync(thumbnail)
-        : Promise.resolve(null)
-
-    const imagesTask = images !== undefined
-        ? images.map(file => processAndUploadImageAsync(file))
-        : []
-
-    const [thumbnailMetadata, ...imageMetadas] = await Promise.all([
-        thumbnailTask,
-        ...imagesTask
-    ])
-
-    if (thumbnailMetadata?.isFailure) return Result.failure(thumbnailMetadata.error)
-
-    const failedImageUpload = imageMetadas.find(res => res.isFailure)
-    if (failedImageUpload?.isFailure) return Result.failure(failedImageUpload.error)
-
-    const thumbnailRes = thumbnailMetadata?.value
-    const imagesRes = imageMetadas.map(res => res.value!)
-
-    return Result.success({ thumbnailResult: thumbnailRes, imagesResult: imagesRes })
-}
-
-// cleanup previous uploaded file 
-async function cleanupPreviousFileAsync(thumbnail: TCloudinaryImage | undefined, images: TCloudinaryImage[]) 
-    : Promise<Result<boolean>>
-{
-    if (thumbnail !== undefined)
-        await deleteFileByPublicIdAsync(thumbnail.publicId).catch((error) => {
-            console.warn("[WARNING]: Failed to delete previous image", error)
-        })
-
-    if (images && images.length > 0)
-        await Promise.all(
-            images.map((file) => deleteFileByPublicIdAsync(file.publicId).catch((error) => {
-                console.warn("[WARNING]: Failed to delete one or more previous images.", error)
-            }))
-        )
 
     return Result.success(true)
 }

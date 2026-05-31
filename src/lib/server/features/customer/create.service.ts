@@ -1,9 +1,10 @@
 import { customers, db } from "$lib/server/data";
 import { CreateCustomerScheme, type TCreateCustomerRequest, type TCreateCustomerResponse } from "$lib/types/features";
-import { Result, STATUS_CODE } from "$lib/types/global";
-import { eq } from "drizzle-orm";
+import { Result } from "$lib/types/global";
+import { and, eq } from "drizzle-orm";
 
 const DOMAIN = "CreateCustomerService" as const
+
 
 export async function createCustomerAsync(data: TCreateCustomerRequest) 
     : Promise<Result<TCreateCustomerResponse>>
@@ -14,56 +15,66 @@ export async function createCustomerAsync(data: TCreateCustomerRequest)
     const payload = validation.data
 
     try {
-        const [isPhoneExist] = await db
-            .select({ id: customers.id, isSoftDeleted: customers.isSoftDeleted })
-            .from(customers)
-            .where(eq(customers.phone, payload.phone))
-            .limit(1)
-        
-        if (isPhoneExist) {
-            if (!isPhoneExist.isSoftDeleted) {
-                return Result.failure({
-                    code: STATUS_CODE.DUPLICATED,
-                    description: `Phone number ${payload.phone} is already exist, use another one.`,
-                    domain: DOMAIN
-                })
-            }
-
-            const [restoreCustomer] = await db
-                .update(customers)
-                .set({
+        const existingCustomer = await findAndSyncCustomerByPhoneAsync(payload.name, payload.phone, payload.instagramUrl)
+        if (!existingCustomer.value.isFound) {
+            const [insertedCustomer] = await db
+                .insert(customers)
+                .values({
                     name: payload.name,
-                    instagramUrl: payload.instagramUrl,
-                    isSoftDeleted: false,
-                    updatedAt: new Date()
+                    phone: payload.phone,
+                    instagramUrl: payload.instagramUrl
                 })
-                .where(eq(customers.id, isPhoneExist.id))
                 .returning()
-
+            
             const response: TCreateCustomerResponse = {
-                id: restoreCustomer.id,
-                name: restoreCustomer.name
+                id: insertedCustomer.id,
+                name: insertedCustomer.name
             }
 
             return Result.success(response)
         }
 
-        const [insertedCustomer] = await db
-            .insert(customers)
-            .values({
-                name: payload.name,
-                phone: payload.phone,
-                instagramUrl: payload.instagramUrl
-            })
-            .returning()
-        
         const response: TCreateCustomerResponse = {
-            id: insertedCustomer.id,
-            name: insertedCustomer.name
+            id: existingCustomer.value.id!,
+            name: existingCustomer.value.name!
         }
 
         return Result.success(response)
     } catch (error: unknown) {
         return Result.serverError(error, DOMAIN)
     }
+}
+
+//--- helper -------------------------------------
+async function findAndSyncCustomerByPhoneAsync(name: string, phone: string, instagramUrl: string | undefined)
+    : Promise<Result<{ isFound: boolean, id: string | undefined, name: string | undefined }>> 
+{
+    const [existingCustomer] = await db
+        .select({ 
+            id: customers.id, 
+            name: customers.name,
+            instagramUrl: customers.instagramUrl
+        })
+        .from(customers)
+        .where(and(
+            eq(customers.phone, phone),
+            eq(customers.isSoftDeleted, false)
+        ))
+        .limit(1)
+
+    if (existingCustomer) {
+        await db
+            .update(customers)
+            .set({
+                name: name ?? existingCustomer.name,
+                phone: phone,
+                instagramUrl: instagramUrl ?? existingCustomer.instagramUrl
+            })
+            .where(eq(customers.id, existingCustomer.id))
+            .returning()
+
+        return Result.success({ isFound: true, id: existingCustomer.id, name: existingCustomer.name })
+    }
+
+    return Result.success({ isFound: false, id: undefined, name: undefined })
 }

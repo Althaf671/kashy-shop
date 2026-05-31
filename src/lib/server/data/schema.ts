@@ -1,4 +1,4 @@
-import { ORDER_STATUS, PAYMENT_METHOD, PRODUCT_TYPE, type TCloudinaryImage } from "$lib/types/global/shared.types";
+import { ORDER_STATUS, PAYMENT_METHOD, PRODUCT_TYPE, type TCloudinaryFile } from "$lib/types/global/shared.types";
 import { 
     boolean, 
     check, 
@@ -32,7 +32,7 @@ export const categories = pgTable('categories', {
     id:                 uuid('id').primaryKey().defaultRandom(),
     name:               varchar('name', { length: CATEGORIES_CONSTRAINT.nameLength }).notNull().unique(),
     description:        varchar('description', { length: CATEGORIES_CONSTRAINT.descriptionLength }).notNull(),
-    thumbnailPicture:   jsonb('thumbnail_picture').$type<TCloudinaryImage>().notNull(),
+    thumbnailPicture:   jsonb('thumbnail_picture').$type<TCloudinaryFile>().notNull(),
     isSoftDeleted:      boolean('is_soft_deleted').default(CATEGORIES_CONSTRAINT.isSoftDeleted),
     slug:               varchar('slug', { length: CATEGORIES_CONSTRAINT.slugLength }).notNull().unique(),
     updatedAt:          timestamp('updated_at', { withTimezone: CATEGORIES_CONSTRAINT.isTimeZone }).defaultNow(),
@@ -51,12 +51,12 @@ export const products = pgTable('products', {
     id:                 uuid('id').primaryKey().defaultRandom(),
     name:               varchar('name', { length: PRODUCTS_CONSTRAINT.nameLength }).notNull(),
     description:        varchar('description', { length: PRODUCTS_CONSTRAINT.descriptionLength }).notNull(),
-    thumbnailPicture:   jsonb('thumbnail_picture').$type<TCloudinaryImage>().notNull(),
+    thumbnailPicture:   jsonb('thumbnail_picture').$type<TCloudinaryFile>().notNull(),
     slug:               varchar('slug', { length: PRODUCTS_CONSTRAINT.slugLength }).notNull().unique(),
     price:              integer('price').notNull(),
     stock:              integer('stock').notNull(),
     type:               productTypeEnum('type').notNull().default(PRODUCT_TYPE[0]),
-    images:             jsonb('image_urls').$type<TCloudinaryImage[]>().notNull(),
+    images:             jsonb('image_urls').$type<TCloudinaryFile[]>().notNull(),
     isSoftDeleted:      boolean('is_soft_deleted').default(PRODUCTS_CONSTRAINT.isSoftDeleted),
     isActive:           boolean('is_active').default(PRODUCTS_CONSTRAINT.isActive).notNull(),
     updatedAt:          timestamp('updated_at', { withTimezone: PRODUCTS_CONSTRAINT.isTimeZone }).defaultNow(),
@@ -92,7 +92,7 @@ export const orders = pgTable('orders', {
     status:             orderStatusEnum('status').notNull().default(ORDER_STATUS[0]),
     totalPrice:         integer('total_price').notNull(),
     paymentMethod:      paymentMethodEnum('payment_method').notNull().default(PAYMENT_METHOD[2]),
-    paymentProof:       jsonb('payment_proof').$type<TCloudinaryImage>(),
+    paymentProof:       jsonb('payment_proof').$type<TCloudinaryFile>(),
     note:               varchar('note', { length: ORDER_CONSTRAINT.noteLength }),
     adminNote:          varchar('admin_note', { length: ORDER_CONSTRAINT.adminNoteLength }),
     updatedAt:          timestamp('updated_at', { withTimezone: ORDER_CONSTRAINT.isTimeZone }).defaultNow(),
@@ -142,7 +142,7 @@ export const users = pgTable('users', {
     email:              varchar('email', { length: USERS_CONSTRAINT.nameLength }).notNull().unique(),
     name:               varchar('name',  { length: USERS_CONSTRAINT.nameLength }).notNull(),
     phone:              varchar('phone_number', { length: USERS_CONSTRAINT.phoneLength }).notNull().unique(),
-    avatarPicture:      jsonb('avatar_picture').$type<TCloudinaryImage>().notNull(),
+    avatarPicture:      jsonb('avatar_picture').$type<TCloudinaryFile>().notNull(),
     updatedAt:          timestamp('updated_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow()
 }, (table) => ([

@@ -1,6 +1,6 @@
 import { ORDER_CONSTRAINT, ORDERITEMS_CONSTRAINT } from "$lib/server/data";
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "$lib/types/global/constant.types";
-import { ORDER_STATUS, PAYMENT_METHOD, type TCloudinaryImage, type TOrderStatus, type TPaymentMethod } from "$lib/types/global/shared.types";
+import { ORDER_STATUS, PAYMENT_METHOD, type TCloudinaryFile, type TOrderStatus, type TPaymentMethod } from "$lib/types/global/shared.types";
 import { z } from "zod";
 
 // ORDER ITEMS
@@ -57,7 +57,13 @@ export type TCreateOrderResponse = {
     id: string; 
     orderCode: string; 
     status: TOrderStatus;
-    note: string;
+    adminNote: string;
+}
+export type TProductRecord = {
+    id: string;
+    name: string;
+    stock: number;
+    price: number;
 }
 
 //--- update by id ---------------------------------
@@ -84,7 +90,7 @@ export type TGetOrderByIdResponse = {
     status: TOrderStatus;
     totalPrice: number;
     paymentMethod: TPaymentMethod;
-    paymentProof: TCloudinaryImage;
+    paymentProof: TCloudinaryFile;
     note: string;
     adminNote: string;
     updatedAt: Date;

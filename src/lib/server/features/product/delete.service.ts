@@ -15,53 +15,21 @@ export async function deleteProductByIdAsync(data: TDeleteProductByIdRequest)
     const { id: productId } = validation.data
 
     try {
-        const [isProductActive] = await db
-            .select({ isActive: products.isActive })
-            .from(products)
-            .where(and(
-                eq(products.id, productId),
-                eq(products.isSoftDeleted, false)
-            ))
-            .limit(1)
+        const isProductAvailable = await isProductAvailableAsync(productId)
+        if (isProductAvailable.isFailure) return Result.failure(isProductAvailable.error)
 
-        if (isProductActive && isProductActive.isActive) 
-            return Result.failure({
-                code: STATUS_CODE.BAD_REQUEST,
-                description: `You can't delete this product while it is still active. Please deactivate it first.`,
-                domain: DOMAIN
-            })
-
-        const [isProductOnActiveOrder] = await db
-            .select({ id: orderItems.id })
-            .from(orderItems)
-            .innerJoin(orders, eq(orders.id, orderItems.orderId))
-            .where(and(
-                eq(orderItems.productId, productId),
-                notInArray(orders.status, ['done', 'cancelled'])
-            ))
-            .limit(1)
-
-        if (isProductOnActiveOrder)
-            return Result.failure({
-                code: STATUS_CODE.FORBIDDEN,
-                description: `Cannot delete this product because there are active, unconfirmed customer orders associated with it.`,
-                domain: DOMAIN
-            })
+        const isProductInActive = await isProductInActiveOrdersAsync(productId)
+        if (isProductInActive.isFailure) return Result.failure(isProductInActive.error)
 
         const now = Date.now().toString()
-
         const [deletedProduct] = await db
             .update(products)
             .set({
-                slug: sql`${products.slug} || '-deleted' || ${now}`,
+                slug: sql`${products.slug} || '-deleted-' || ${now}`,
                 isSoftDeleted: true
             })
-            .where(and(
-                eq(products.id, productId),
-                eq(products.isSoftDeleted, false)
-            ))
+            .where(eq(products.id, productId))
             .returning({ id: products.id })
-
         if (!deletedProduct) 
             return Result.failure({
                 code: STATUS_CODE.NOT_FOUND,
@@ -73,4 +41,57 @@ export async function deleteProductByIdAsync(data: TDeleteProductByIdRequest)
     } catch (error: unknown) {
         return Result.serverError(error, DOMAIN)
     }
+}
+
+//--- helper -------------------------------------
+// find is product is exist and non in status active
+async function isProductAvailableAsync(productId: string): Promise<Result<boolean>>{
+    const [productRecord] = await db
+        .select({ isActive: products.isActive })
+        .from(products)
+        .where(and(
+            eq(products.id, productId),
+            eq(products.isSoftDeleted, false)
+        ))
+        .limit(1)
+
+    if (!productRecord) 
+        return Result.failure({
+            code: STATUS_CODE.NOT_FOUND,
+            description: `Product with ID: ${productId} not found.`,
+            domain: DOMAIN
+        })
+
+    if (productRecord.isActive)
+        return Result.failure({
+            code: STATUS_CODE.BAD_REQUEST,
+            description: `You can't delete this product while it is still active. Please deactivate it first.`,
+            domain: DOMAIN
+        })
+
+    return Result.success(true)
+}
+
+// find any order item from order that's associate with current product
+async function isProductInActiveOrdersAsync(productId: string) 
+    : Promise<Result<boolean>>
+{
+    const [isProductOnActiveOrder] = await db
+        .select({ id: orderItems.id })
+        .from(orderItems)
+        .innerJoin(orders, eq(orders.id, orderItems.orderId))
+        .where(and(
+            eq(orderItems.productId, productId),
+            notInArray(orders.status, ['done', 'cancelled'])
+        ))
+        .limit(1)
+
+    if (isProductOnActiveOrder)
+        return Result.failure({
+            code: STATUS_CODE.FORBIDDEN,
+            description: `Cannot delete this product because there are active, unconfirmed customer orders associated with it.`,
+            domain: DOMAIN
+        })
+
+    return Result.success(true)
 }

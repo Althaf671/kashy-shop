@@ -1,10 +1,10 @@
 import { Result } from "$lib/types/global/result.types";
-import { and, eq, ilike, ne, or } from "drizzle-orm";
-import { KASH, STATUS_CODE } from "$lib/types/global/constant.types";
-import { deleteFileByPublicIdAsync, findSpecificErrorValues, processAndUploadThumbnailAsync } from "$lib/server/utils";
+import { and, eq, ne } from "drizzle-orm";
+import { STATUS_CODE } from "$lib/types/global/constant.types";
+import { cleanupPreviousFileAsync, processAndUploadImageAsync } from "$lib/server/utils";
 import { UpdateCategoryByIdSchema, type TUpdateCategoryByIdRequest, type TUpdateCategoryByIdResponse } from "$lib/types/features";
-import type { TCloudinaryImage } from "$lib/types/global";
 import { categories, db } from "$lib/server/data";
+import { MESSAGES, type TCloudinaryFile } from "$lib/types/global";
 
 const DOMAIN = "UpdateCategoryByIdService" as const
 
@@ -17,90 +17,52 @@ export async function updateCategoryByIdAsync(data: TUpdateCategoryByIdRequest)
 
     const { id: categoryId, data: patchData } = validation.data;
 
+    let finalThumbnail: TCloudinaryFile | undefined = undefined
+    let prevThumbnail: TCloudinaryFile | undefined = undefined
+
     try {
-        const [existingCategory] = await db
-            .select({ 
-                id: categories.id, 
-                thumbnailPicture: categories.thumbnailPicture 
-            })
-            .from(categories)
-            .where(and(
-                eq(categories.id, categoryId),
-                eq(categories.isSoftDeleted, false)
-            ))
-            .limit(1)
+        // check is category exist and return prev thumbnail
+        const existingCategory = await isCategoryAvailableAsync(categoryId)
+        if (existingCategory.isFailure) return Result.failure(existingCategory.error)
+        
+        // check is slug duplicated 
+        if (patchData.slug !== undefined) {
+            const isSlugDuplicated = await isSlugDuplicatedAsync(categoryId, patchData.slug)
+            if (isSlugDuplicated.isFailure) return Result.failure(isSlugDuplicated.error)
+        }
 
-        if (!existingCategory) 
-            return Result.failure({
-                code: STATUS_CODE.NOT_FOUND,
-                description: `Category with ID: ${categoryId} not found.`,
-                domain: DOMAIN
-            })
-
-        // temp var for rollback
-        let prevThumbnail: TCloudinaryImage | undefined = undefined
-
-        if (patchData.name !== undefined || patchData.slug !== undefined) {
-            const orConditions =[]
-            if (patchData.name !== undefined) orConditions.push(ilike(categories.name, patchData.name))
-            if (patchData.slug !== undefined) orConditions.push(eq(categories.slug, patchData.slug))
-
-            const [isDuplicated] = await db
-                .select({ id: categories.id, name: categories.name, slug: categories.slug })
-                .from(categories)
-                .where(
-                    and(
-                        or(...orConditions),
-                        ne(categories.id, categoryId),
-                        eq(categories.isSoftDeleted, false)
-                    )
-                )
-                .limit(1)
-
-            if (isDuplicated) {
-                const specificReason = findSpecificErrorValues(
-                    { ori: isDuplicated.name, current: patchData.name },
-                    { ori: isDuplicated.slug, current: patchData.slug }
-                );
-                const errMsg = `Category with ${specificReason} already exists, ${KASH}.`;
-                
-                return Result.failure({
-                    code: STATUS_CODE.DUPLICATED,
-                    description: errMsg,
-                    domain: DOMAIN
-                })
-            }
+        // check is name duplicated
+        if (patchData.name !== undefined) {
+            const isNameDuplicated = await isNameDuplicatedAsync(categoryId, patchData.name)
+            if (isNameDuplicated.isFailure) return Result.failure(isNameDuplicated.error)
         }
         
+        // compress and upload image to storage
         if (patchData.thumbnailPicture !== undefined) {
-            const metadata = await processAndUploadThumbnailAsync(patchData.thumbnailPicture)
-            if (metadata.isFailure) return Result.failure(metadata.error) 
-            thumbnailMetadata = metadata.value
+            const mediaResult = await processAndUploadImageAsync(patchData.thumbnailPicture)
+            if (mediaResult.isFailure) return Result.failure(mediaResult.error) 
+
+            if (mediaResult) {
+                prevThumbnail = existingCategory.value.thumbnailPicture
+                finalThumbnail = mediaResult.value
+            }
         }
 
+        // save to database
         const [updatedCategory] = await db
             .update(categories)
             .set({
                 ...(patchData.name !== undefined && { name: patchData.name }),
                 ...(patchData.description !== undefined && { description: patchData.description }),
                 ...(patchData.slug !== undefined && { slug: patchData.slug }),
-                ...(thumbnailMetadata !== undefined && { thumbnailPicture: thumbnailMetadata }),
+                ...(finalThumbnail !== undefined && { thumbnailPicture: finalThumbnail }),
                 updatedAt: new Date()
             })
             .where(eq(categories.id, categoryId))
             .returning()
 
-        if (!updatedCategory) 
-            return Result.failure({
-                code: STATUS_CODE.NOT_FOUND,
-                description: `Category with ID: ${categoryId} not found.`,
-                domain: DOMAIN
-            })
-
-        if (prevThumbnail && thumbnailMetadata !== undefined) 
-            await deleteFileByPublicIdAsync(prevThumbnail.publicId).catch((error) => {
-                console.warn("[WARNING]: Failed to delete previous image", error)
-            })
+        // remove prev image from storage
+        await cleanupPreviousFileAsync(prevThumbnail)
 
         const response: TUpdateCategoryByIdResponse = {
             id: updatedCategory.id,
@@ -109,11 +71,74 @@ export async function updateCategoryByIdAsync(data: TUpdateCategoryByIdRequest)
 
         return Result.success(response)
     } catch (error: unknown) {
-        if (thumbnailMetadata) 
-            await deleteFileByPublicIdAsync(thumbnailMetadata.publicId).catch((error) => {
-                console.warn("[WARNING]: Failed to delete previous image", error)
-            })
-
+        // rollback uploaded image if save db failed
+        await cleanupPreviousFileAsync(finalThumbnail)
         return Result.serverError(error, DOMAIN)
     }
+}
+
+//--- helper -------------------------------------
+async function isCategoryAvailableAsync(categoryId: string)
+    : Promise<Result<{ thumbnailPicture: TCloudinaryFile }>> 
+{
+    const [categoryRecord] = await db
+        .select({ 
+            id: categories.id, 
+            thumbnailPicture: categories.thumbnailPicture 
+        })
+        .from(categories)
+        .where(and(
+            eq(categories.id, categoryId),
+            eq(categories.isSoftDeleted, false)
+        ))
+        .limit(1)
+
+    if (!categoryRecord) 
+        return Result.failure({
+            code: STATUS_CODE.NOT_FOUND,
+            description: MESSAGES.NOT_FOUND("Category", categoryId),
+            domain: DOMAIN
+        })
+
+    return Result.success({ thumbnailPicture: categoryRecord.thumbnailPicture })
+}
+
+async function isSlugDuplicatedAsync(categoryId: string, slug: string): Promise<Result<boolean>> {
+    const [isDuplicated] = await db
+        .select({ id: categories.id, slug: categories.slug })
+        .from(categories)
+        .where(and(
+            eq(categories.slug, slug),
+            ne(categories.id, categoryId)
+        ))
+        .limit(1)
+
+    if (isDuplicated)
+        return Result.failure({
+            code: STATUS_CODE.DUPLICATED,
+            description: MESSAGES.NOT_FOUND("Category", categoryId),
+            domain: DOMAIN
+        })
+
+    return Result.success(true)
+}
+
+async function isNameDuplicatedAsync(categoryId: string, name: string): Promise<Result<boolean>> {
+    const [isDuplicated] = await db
+        .select({ id: categories.id, name: categories.name })
+        .from(categories)
+        .where(and(
+            eq(categories.name, name),
+            ne(categories.id, categoryId)
+        ))
+        .limit(1)
+
+    if (isDuplicated)
+        return Result.failure({
+            code: STATUS_CODE.DUPLICATED,
+            description: MESSAGES.DUPLICATED("Category", "name", name),
+            domain: DOMAIN
+        })
+
+    return Result.success(true)
 }

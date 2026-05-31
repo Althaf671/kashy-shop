@@ -20,7 +20,20 @@ export const PAYMENT_METHOD = [
 export type TPaymentMethod = typeof PAYMENT_METHOD[number]
 
 //-- Cloudinary -----------------------------------
-export type TCloudinaryImage = {
+export type TCloudinaryFile = {
     publicId: string;
-    imageUrl: string;
+    fileUrl: string;
+}
+
+//-- Pagination -----------------------------------
+export type TGetPaginatedResponse<T> = {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        pageSize: number;
+        totalPages: number;
+        hasNextPage: boolean;    
+        hasPrevPage: boolean;
+    }
 }

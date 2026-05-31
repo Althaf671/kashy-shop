@@ -1,12 +1,13 @@
-import { categories, db, products } from "$lib/server/data";
-import { deleteFileByPublicIdAsync, findSpecificErrorValues, processAndUploadThumbnailAsync } from "$lib/server/utils";
-import { CreateProductScheme, type TCreateProductRequest, type TCreateProductResponse } from "$lib/types/features";
-import { KASH, Result, STATUS_CODE, type TCloudinaryImage } from "$lib/types/global";
 import { and, eq, ilike, or } from "drizzle-orm";
+import { categories, db, products } from "$lib/server/data";
+import { KASH, Result, STATUS_CODE, type TCloudinaryFile } from "$lib/types/global";
+import { cleanupPreviousFileAsync, findSpecificErrorValues, processAndUploadMultiImagesAsync } from "$lib/server/utils";
+import { CreateProductScheme, type TCreateProductRequest, type TCreateProductResponse } from "$lib/types/features";
 
-const DOMAIN = "CreateProductService" as const
 
 //--- create -------------------------------------
+const DOMAIN = "CreateProductService" as const
+
 export async function createProductAsync(data: TCreateProductRequest)
     : Promise<Result<TCreateProductResponse>> 
 {
@@ -15,79 +16,28 @@ export async function createProductAsync(data: TCreateProductRequest)
 
     const payload = validation.data
 
-    let finalThumbnail: TCloudinaryImage | undefined = undefined
-    let finalImages: TCloudinaryImage[] = []
+    let finalThumbnail: TCloudinaryFile | undefined = undefined
+    let finalImages: TCloudinaryFile[] = []
 
     try {
-        // check is targeted category is actually exist.
-        const [isCategoryExist] = await db
-            .select({ id: categories.id })
-            .from(categories)
-            .where(and(
-                eq(categories.id, payload.categoryId),
-                eq(categories.isSoftDeleted, false)
-            ))
-            .limit(1)
-        if (!isCategoryExist)
-            return Result.failure({
-                code: STATUS_CODE.NOT_FOUND,
-                description: `Category with ID: ${payload.categoryId} not found.`,
-                domain: DOMAIN
-            })
+        // check is category exist
+        const isCategoryExist = await isAssociateCategoryExistAsync(payload.categoryId)
+        if (isCategoryExist.isFailure) return Result.failure(isCategoryExist.error)
+        
+        // check is slug and name in respected category duplicated
+        const checkDuplicate = await checkDuplicateSlugAndNameInCategoryAsync(payload.categoryId, payload.name, payload.slug)
+        if (checkDuplicate.isFailure) return Result.failure(checkDuplicate.error)
+       
+        // compress and upload multiple images to storage
+        const multiMediaResult = await processAndUploadMultiImagesAsync(payload.thumbnailPicture, payload.images)
+        if (multiMediaResult.isFailure) return Result.failure(multiMediaResult.error)
 
-        // check if there any product with same slug exist and product with same name
-        // from same category exist.
-        const [isProductExist] = await db
-            .select({ 
-                id: products.id,
-                name: products.name,
-                categoryId: products.categoryId,
-                slug: products.slug 
-            })
-            .from(products)
-            .where(and(
-                eq(products.isSoftDeleted, false),
-                or(
-                    and(
-                        ilike(products.name, payload.name),
-                        eq(products.categoryId, payload.categoryId),
-                    ),
-                    eq(products.slug, payload.slug)
-                )
-            ))
-            .limit(1)
-        if (isProductExist) {
-            const specificReason = findSpecificErrorValues(
-                { ori: isProductExist.categoryId, current: payload.categoryId },
-                { ori: isProductExist.name, current: payload.name },
-                { ori: isProductExist.slug, current: payload.slug },
-            )
-            const errMsg = `Category with ${specificReason} already exists, ${KASH}.`
+        const { thumbnailResult, imagesResult } = multiMediaResult.value
 
-            return Result.failure({
-                code: STATUS_CODE.DUPLICATED,
-                description: `Field with value ${errMsg} already exist, use another one.`,
-                domain: DOMAIN
-            })
-        }
+        finalThumbnail = thumbnailResult!
+        finalImages = imagesResult
 
-        // parallel upload thumbnail and images.
-        const thumbnailTask = processAndUploadThumbnailAsync(payload.thumbnailPicture)
-        const imageTasks = payload.images.map((file) => processAndUploadThumbnailAsync(file))
-
-        const [thumbnailMetadata, ...imageMetadas] = await Promise.all([
-            thumbnailTask, 
-            ...imageTasks
-        ])
-
-        if (thumbnailMetadata.isFailure) return Result.failure(thumbnailMetadata.error)
-
-        const failedImageUpload = imageMetadas.find(res => res.isFailure)
-        if (failedImageUpload) return Result.failure(failedImageUpload.error)
-
-        finalThumbnail = thumbnailMetadata.value!
-        finalImages = imageMetadas.map(res => res.value!)
-
+        // save to database
         const [createdProduct] = await db
             .insert(products)
             .values({
@@ -104,7 +54,6 @@ export async function createProductAsync(data: TCreateProductRequest)
             })
             .returning()
 
-        // response
         const response: TCreateProductResponse = {
             id: createdProduct.id,
             slug: createdProduct.slug
@@ -112,19 +61,71 @@ export async function createProductAsync(data: TCreateProductRequest)
 
         return Result.success(response)
     } catch (error: unknown) {
-        // if somehow database crashed while creating, remove the new thumbnail and images from storage.
-        if (finalThumbnail !== undefined) 
-            await deleteFileByPublicIdAsync(finalThumbnail.publicId).catch((error) => {
-                console.warn("[WARNING]: Failed to delete previoud image", error)
-            })
-
-        if (finalImages.length > 0)
-            await Promise.all(
-                finalImages.map((file) => deleteFileByPublicIdAsync(file.publicId).catch((error) => {
-                    console.warn("[WARNING]: Failed to delete one or more previous images.", error)
-                }))
-            )
-
+        await cleanupPreviousFileAsync(finalThumbnail, finalImages)
         return Result.serverError(error, DOMAIN)
     }
+}
+
+//--- helper -------------------------------------
+async function isAssociateCategoryExistAsync(categoryId: string) 
+    : Promise<Result<boolean>>
+{
+    const [isCategoryExist] = await db
+        .select({ id: categories.id })
+        .from(categories)
+        .where(and(
+            eq(categories.id, categoryId),
+            eq(categories.isSoftDeleted, false)
+        ))
+        .limit(1)
+
+    if (!isCategoryExist)
+        return Result.failure({
+            code: STATUS_CODE.NOT_FOUND,
+            description: `Category with ID: ${categoryId} not found.`,
+            domain: DOMAIN
+        })
+
+    return Result.success(true)
+}
+
+async function checkDuplicateSlugAndNameInCategoryAsync(categoryId: string, name: string, slug: string)
+    : Promise<Result<boolean>>
+{
+    const [isDuplicated] = await db
+        .select({ 
+            id: products.id,
+            name: products.name,
+            categoryId: products.categoryId,
+            slug: products.slug,
+        })
+        .from(products)
+        .where(and(
+            eq(products.isSoftDeleted, false),
+            or(
+                and(
+                    ilike(products.name, name),
+                    eq(products.categoryId, categoryId),
+                ),
+                eq(products.slug, slug)
+            )
+        ))
+        .limit(1)
+
+    if (isDuplicated) {
+        const specificReason = findSpecificErrorValues(
+            { ori: isDuplicated.categoryId, current: categoryId },
+            { ori: isDuplicated.name, current: name },
+            { ori: isDuplicated.slug, current: slug },
+        )
+        const errMsg = `Category with ${specificReason} already exists, ${KASH}.`
+
+        return Result.failure({
+            code: STATUS_CODE.DUPLICATED,
+            description: `Field with value ${errMsg} already exist, use another one.`,
+            domain: DOMAIN
+        })
+    }
+
+    return Result.success(true)
 }

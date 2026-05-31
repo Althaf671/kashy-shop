@@ -1,6 +1,6 @@
 import { ACCEPTED_IMAGE_TYPES, KASH, MAX_FILE_SIZE } from "$lib/types/global/constant.types";
 import { z } from "zod";
-import type { TCloudinaryImage } from "../global";
+import type { TCloudinaryFile } from "../global";
 import { CATEGORIES_CONSTRAINT } from "$lib/server/data";
 
 //--- create -------------------------------------
@@ -49,7 +49,7 @@ export type TGetCategoryByIdResponse = {
     id: string;
     name: string;
     description: string;
-    thumbnailPicture: TCloudinaryImage;
+    thumbnailPicture: TCloudinaryFile;
     slug: string;
     updatedAt: Date | null;
     createdAt: Date | null;

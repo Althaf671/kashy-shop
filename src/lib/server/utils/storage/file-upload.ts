@@ -1,10 +1,10 @@
 import type { UploadApiResponse } from "cloudinary";
 import type { UploadApiErrorResponse } from "cloudinary";
-import { cloudinary } from "../config/cloudinary";
-import { FOLDER_NAME, Result, type TCloudinaryImage } from "$lib/types/global";
+import { cloudinary } from "../../config/interceptor/cloudinary";
+import { FOLDER_NAME, Result,type TCloudinaryFile } from "$lib/types/global"; 
 
 export async function uploadFileAsync(buffer: Buffer)
-    : Promise<Result<TCloudinaryImage>>
+    : Promise<Result<TCloudinaryFile>>
 {
     try {
         const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
@@ -28,9 +28,9 @@ export async function uploadFileAsync(buffer: Buffer)
             uploadStream.end(buffer);
         });
 
-        const imageData: TCloudinaryImage = {
+        const imageData: TCloudinaryFile = {
             publicId: uploadResult.public_id,
-            imageUrl: uploadResult.secure_url
+            fileUrl: uploadResult.secure_url
         }
 
         return Result.success(imageData)
@@ -57,7 +57,7 @@ export async function deleteFileByPublicIdAsync(publicId: string)
             });
         }
 
-        return Result.success("Image deleted successfully");
+        return Result.success("File deleted successfully");
 
     } catch (error: unknown) {
         const err = error instanceof Error ? error : new Error(String(error));

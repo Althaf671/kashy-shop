@@ -1,4 +1,4 @@
-import { toError } from "$lib/server/utils/to-error";
+import { toError } from "$lib/server/utils/general/error";
 import { STATUS_CODE } from "./constant.types";
 
 export type AppError = {

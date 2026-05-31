@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { Result } from "$lib/types/global/result.types";
-import { STATUS_CODE } from "$lib/types/global/constant.types";
+import { MESSAGES, STATUS_CODE } from "$lib/types/global/constant.types";
 import { DeleteCategoryByIdSchema, type TDeleteCategoryByIdRequest } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
 
@@ -14,10 +14,10 @@ export async function deleteCategoryByIdAsync(data: TDeleteCategoryByIdRequest)
     if (!validation.success) return Result.validationFailure(validation.error, DOMAIN)
 
     const { id: categoryId } = validation.data;
+    const now = Date.now().toString()
     
     try {
-        const now = Date.now().toString()
-
+        // set soft delete
         const [deletedCategory] = await db
             .update(categories)
             .set({ 
@@ -34,11 +34,11 @@ export async function deleteCategoryByIdAsync(data: TDeleteCategoryByIdRequest)
         if (!deletedCategory) 
             return Result.failure({
                 code: STATUS_CODE.NOT_FOUND,
-                description: `Category with ID: ${categoryId} not found.`,
+                description: MESSAGES.NOT_FOUND("Category", categoryId),
                 domain: DOMAIN
             })
         
-        return Result.success(`Success deleting category with ID: ${categoryId}.`)
+        return Result.success(STATUS_CODE.SUCCESS)
     } catch (error: unknown) {
         return Result.serverError(error, DOMAIN)
     }

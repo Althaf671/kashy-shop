@@ -15,23 +15,8 @@ export async function updateCustomerByIdAsync(data: TUpdateCustomerByIdRequest)
 
     try {
         if (patchData.phone !== undefined) {
-            const [isPhoneExist] = await db
-                .select({ id: customers.id })
-                .from(customers)
-                .where(
-                    and(
-                        eq(customers.phone, patchData.phone),
-                        ne(customers.id, customerId)
-                    )
-                )
-                .limit(1)
-            
-            if (isPhoneExist) 
-                return Result.failure({
-                    code: STATUS_CODE.DUPLICATED,
-                    description: `Phone number ${patchData.phone} is already exist, use another one.`,
-                    domain: DOMAIN
-                })
+            const isDuplicated = await isPhoneDuplicated(customerId, patchData.phone)
+            if (isDuplicated.isFailure) return Result.failure(isDuplicated.error)
         }
 
         const [updatedCustomer] = await db
@@ -61,4 +46,27 @@ export async function updateCustomerByIdAsync(data: TUpdateCustomerByIdRequest)
     } catch (error: unknown) {
         return Result.serverError(error, DOMAIN)
     }
+}
+
+//--- helper -------------------------------------
+async function isPhoneDuplicated(customerId: string, phone: string): Promise<Result<boolean>> {
+    const [isPhoneExist] = await db
+        .select({ id: customers.id })
+        .from(customers)
+        .where(
+            and(
+                eq(customers.phone, phone),
+                ne(customers.id, customerId)
+                )
+            )
+        .limit(1)
+            
+    if (isPhoneExist) 
+        return Result.failure({
+            code: STATUS_CODE.DUPLICATED,
+            description: `Phone number ${phone} is already exist, use another one.`,
+            domain: DOMAIN
+        })
+
+    return Result.success(true)
 }
