@@ -5,7 +5,8 @@ import {
     WHITELIST_EMAIL,
     GOOGLE_OAUTH_CLIENT_ID,
     GOOGLE_OAUTH_CLIENT_SECRET,
-    DATABASE_SUPABASE_URL
+    DATABASE_SUPABASE_URL,
+    IS_PRODUCTION
 } from "$env/static/private";
 import { z } from "zod";
 
@@ -17,6 +18,7 @@ const envSchema = z.object({
     WHITELIST_EMAIL: z.string().min(1),
     GOOGLE_ID: z.string().min(1),
     GOOGLE_SECRET: z.string().min(1),
+    IS_PRODUCTION: z.string().min(1)
 });
 
 export const ENV = envSchema.parse({
@@ -26,5 +28,6 @@ export const ENV = envSchema.parse({
     CLOUDINARY_SECRET: CLOUDINARY_CLIENT_SECRET,
     WHITELIST_EMAIL: WHITELIST_EMAIL,
     GOOGLE_ID: GOOGLE_OAUTH_CLIENT_ID,
-    GOOGLE_SECRET: GOOGLE_OAUTH_CLIENT_SECRET
+    GOOGLE_SECRET: GOOGLE_OAUTH_CLIENT_SECRET,
+    IS_PRODUCTION: IS_PRODUCTION
 });

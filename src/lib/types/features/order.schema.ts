@@ -1,4 +1,4 @@
-import { ORDER_CONSTRAINT, ORDERITEMS_CONSTRAINT } from "$lib/server/data";
+import { CUSTOMERS_CONSTRAINT, ORDER_CONSTRAINT, ORDERITEMS_CONSTRAINT } from "$lib/server/data";
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "$lib/types/global/constant.types";
 import { ORDER_STATUS, PAYMENT_METHOD, type TCloudinaryFile, type TOrderStatus, type TPaymentMethod } from "$lib/types/global/shared.types";
 import { z } from "zod";
@@ -37,19 +37,12 @@ export const CreateOrderScheme = z.object({
             { error: `You can not input any number below ${ORDER_CONSTRAINT.totalPriceRange.min}.`})
         .max(ORDER_CONSTRAINT.totalPriceRange.max, 
             { error: `You can not input total price above ${ORDER_CONSTRAINT.totalPriceRange.max}.`}),
-    paymentMethod: z.enum(PAYMENT_METHOD),
-    paymentProof: z
-        .file()
-        .max(MAX_FILE_SIZE, `Maximum file size is 2MB.`)
-        .mime(ACCEPTED_IMAGE_TYPES, `File format is must between JPG, JPEG, or WEBP.`)
-        .optional(),
     note: z
         .string()
         .trim()
         .min(5, { error: `Minimum 5 characters.`})
         .max(ORDER_CONSTRAINT.noteLength, `Maximum ${ORDER_CONSTRAINT.noteLength} characters.`)
         .optional(),
-    customerId: z.uuid("You did not input a valid UUID."), 
     items: z.array(CreateOrderItemsScheme).min(1, "Atleast choose one product.")
 })
 export type TCreateOrderRequest = z.infer<typeof CreateOrderScheme>
@@ -57,13 +50,36 @@ export type TCreateOrderResponse = {
     id: string; 
     orderCode: string; 
     status: TOrderStatus;
-    adminNote: string;
 }
-export type TProductRecord = {
+
+//--- attach to id and phone -----------------------
+export const AttachCustomerToOrderScheme = z.object({
+    orderId: z.uuid("You did not input a valid UUID."),
+    phone: z.e164(`Please input a valid phone number. (eg: +628xxx)`).trim(),
+    name: z
+        .string()
+        .trim()
+        .min(5, { error: `Minimum 5 characters.`})
+        .max(CUSTOMERS_CONSTRAINT.nameLength, `Maximum ${CUSTOMERS_CONSTRAINT.nameLength} characters.`)
+        .optional(),
+    instagramUrl: z.url({ hostname: /^instagram\.com$/ }).trim().optional()
+})
+
+//--- pay by id ------------------------------------
+export const PayOrderScheme = z.object({
+    orderId: z.uuid("You did not input a valid UUID."),
+    paymentMethod: z.enum(PAYMENT_METHOD),
+    paymentProof: z
+        .file()
+        .max(MAX_FILE_SIZE, `Maximum file size is 2MB.`)
+        .mime(ACCEPTED_IMAGE_TYPES, `File format is must between JPG, JPEG, or WEBP.`)
+        .optional(),
+})
+export type TPayOrderResponse = {
     id: string;
-    name: string;
-    stock: number;
-    price: number;
+    orderCode: string;
+    status: TOrderStatus;
+    paymentMethod: TPaymentMethod;
 }
 
 //--- update by id ---------------------------------
@@ -76,12 +92,23 @@ export const UpdateOrderByIdScheme = z.object({
         .max(ORDER_CONSTRAINT.adminNoteLength, `Maximum ${ORDER_CONSTRAINT.adminNoteLength} characters.`)
         .optional(),
     status: z.enum(ORDER_STATUS),
-    data: CreateOrderScheme.partial()
 })
 export type TUpdateOrderByIdRequest = z.infer<typeof UpdateOrderByIdScheme>
-export type TUpdateorderByIdResponse = TCreateOrderResponse
+export type TUpdateorderByIdResponse = {
+    id: string;
+    orderCode: string;
+    status: TOrderStatus;
+    adminNote: string | null;
+}
 
 //--- get by id ----------------------------------
+export type TProductRecord = {
+    id: string;
+    name: string;
+    stock: number;
+    price: number;
+}
+
 export const GetOrderByIdScheme = z.object({ id: z.uuid("You did not input a valid UUID.")})
 export type TGetOrderByIdRequest = z.infer<typeof GetOrderByIdScheme>
 export type TGetOrderByIdResponse = {

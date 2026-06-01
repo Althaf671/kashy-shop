@@ -1,5 +1,4 @@
 import { CUSTOMERS_CONSTRAINT } from "$lib/server/data";
-import { KASH } from "$lib/types/global/constant.types";
 import { z } from "zod";
 
 //--- create -------------------------------------
@@ -7,9 +6,9 @@ export const CreateCustomerScheme = z.object({
     name: z
         .string()
         .trim()
-        .min(5, { error: `Minimum 5 characters, ${KASH}.`})
-        .max(CUSTOMERS_CONSTRAINT.nameLength, `Maximum ${CUSTOMERS_CONSTRAINT.nameLength} characters, ${KASH}.`),
-    phone: z.e164(`Please input a valid phone number, ${KASH}. (eg: +628xxx)`).trim(),
+        .min(5, { error: `Minimum 5 characters.`})
+        .max(CUSTOMERS_CONSTRAINT.nameLength, `Maximum ${CUSTOMERS_CONSTRAINT.nameLength} characters.`),
+    phone: z.e164(`Please input a valid phone number. (eg: +628xxx)`).trim(),
     instagramUrl: z.url({ hostname: /^instagram\.com$/ }).trim().optional()
 })
 export type TCreateCustomerRequest = z.infer<typeof CreateCustomerScheme>

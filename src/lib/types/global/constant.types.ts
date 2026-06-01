@@ -1,3 +1,6 @@
+import { ENV } from "$lib/server/config/general/env";
+import { time } from "$lib/server/utils/general/time";
+
 //--- Kashley -----------------------------------
 export const KASH = "Kash" as const;
 
@@ -22,6 +25,23 @@ export const STATUS_CODE = {
     FORBIDDEN: "FORBIDDEN",
     SUCCESS: "SUCCESS"
 } as const
+
+//--- Security ---------------------------------
+export const TOKEN_NAME = {
+    SESSION: "__secureSession"
+}
+
+export const TOKEN_CONSTRAINT = {
+    SESSION: {
+        isHttpOnly: true,
+        path: '/',
+        isSecure: Boolean(ENV.IS_PRODUCTION) || true,
+        sameSite: 'lax',
+        maxAge: 0
+    }
+} as const
+
+export const SLIDING_DURATION_WINDOW = time.inDays(15)
 
 //--- Messages ----------------------------------
 export const MESSAGES = {

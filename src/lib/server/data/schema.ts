@@ -91,13 +91,13 @@ export const orders = pgTable('orders', {
     orderCode:          varchar('order_code', { length: ORDER_CONSTRAINT.orderCodeLength }).notNull().unique(),
     status:             orderStatusEnum('status').notNull().default(ORDER_STATUS[0]),
     totalPrice:         integer('total_price').notNull(),
-    paymentMethod:      paymentMethodEnum('payment_method').notNull().default(PAYMENT_METHOD[2]),
+    paymentMethod:      paymentMethodEnum('payment_method').default(PAYMENT_METHOD[2]),
     paymentProof:       jsonb('payment_proof').$type<TCloudinaryFile>(),
     note:               varchar('note', { length: ORDER_CONSTRAINT.noteLength }),
     adminNote:          varchar('admin_note', { length: ORDER_CONSTRAINT.adminNoteLength }),
     updatedAt:          timestamp('updated_at', { withTimezone: ORDER_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: ORDER_CONSTRAINT.isTimeZone }).defaultNow(),
-    customerId:         uuid('customer_id').references(() => customers.id, { onDelete: 'restrict'}).notNull()
+    customerId:         uuid('customer_id').references(() => customers.id, { onDelete: 'restrict'})
 }, (table) => ([
     {
         totalPriceCheck: check(
