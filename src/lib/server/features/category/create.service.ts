@@ -1,10 +1,9 @@
 import { Result } from "$lib/types/global/result.types";
 import { and, eq, ilike, or } from "drizzle-orm";
-import { STATUS_CODE } from "$lib/types/global/constant.types";
 import { cleanupPreviousFileAsync, findSpecificErrorValues, processAndUploadImageAsync } from "$lib/server/utils";
 import { CreateCategorySchema, type TCreateCategoryRequest, type TCreateCategoryResponse } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
-import { MESSAGES, type TCloudinaryFile } from "$lib/types/global";
+import { messages, statusCodes, type TCloudinaryFile } from "$lib/types/global";
 
 const DOMAIN = "CategoryService" as const
 
@@ -83,8 +82,8 @@ async function checkDuplicateSlugOrNameAsync(name: string, slug: string)
             );
 
             return Result.failure({ 
-                code: STATUS_CODE.DUPLICATED, 
-                description: MESSAGES.DUPLICATED("Category", typeof(specificReason), specificReason), 
+                code: statusCodes.DUPLICATED, 
+                description: messages.DUPLICATED("Category", typeof(specificReason), specificReason), 
                 domain: DOMAIN 
             })
         }

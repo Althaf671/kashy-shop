@@ -1,5 +1,5 @@
 {
-  "id": "bc317b3f-2c62-4f79-bbe9-45b0aaf86dc8",
+  "id": "1b37f8cc-88a2-4d4d-a908-b31dbe332128",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -14,12 +14,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "type": {
-          "name": "type",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
         "provider": {
           "name": "provider",
           "type": "varchar",
@@ -31,48 +25,6 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
-        },
-        "refresh_token": {
-          "name": "refresh_token",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "access_token": {
-          "name": "access_token",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "token_type": {
-          "name": "token_type",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "scope": {
-          "name": "scope",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id_token": {
-          "name": "id_token",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "session_state": {
-          "name": "session_state",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -125,6 +77,13 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true
+        },
+        "is_soft_deleted": {
+          "name": "is_soft_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         },
         "slug": {
           "name": "slug",
@@ -198,6 +157,13 @@
           "type": "varchar(2048)",
           "primaryKey": false,
           "notNull": false
+        },
+        "is_soft_deleted": {
+          "name": "is_soft_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         },
         "updated_at": {
           "name": "updated_at",
@@ -343,7 +309,7 @@
           "type": "payment_method",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "'cash'"
         },
         "payment_proof": {
@@ -382,7 +348,7 @@
           "name": "customer_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         }
       },
       "indexes": {},
@@ -476,6 +442,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "is_soft_deleted": {
+          "name": "is_soft_deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
         "is_active": {
           "name": "is_active",
           "type": "boolean",
@@ -516,7 +489,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },

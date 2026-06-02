@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { Result } from "$lib/types/global/result.types";
-import { STATUS_CODE } from "$lib/types/global/constant.types";
 import { GetCategoryByIdSchema, type TGetCategoryByIdRequest, type TGetCategoryByIdResponse } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
+import { statusCodes } from "$lib/types/global";
 
 const DOMAIN = "GetCategoryByIdService" as const
 
@@ -34,7 +34,7 @@ export async function getCategorybyIdAsync(data: TGetCategoryByIdRequest)
              
         if (!queryCategory) 
             return Result.failure({
-                code: STATUS_CODE.NOT_FOUND,
+                code: statusCodes.NOT_FOUND,
                 description: `Category with ID: ${categoryId} not found.`,
                 domain: DOMAIN
             })

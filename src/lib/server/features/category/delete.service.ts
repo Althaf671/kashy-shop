@@ -1,8 +1,8 @@
 import { and, eq, sql } from "drizzle-orm";
 import { Result } from "$lib/types/global/result.types";
-import { MESSAGES, STATUS_CODE } from "$lib/types/global/constant.types";
 import { DeleteCategoryByIdSchema, type TDeleteCategoryByIdRequest } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
+import { messages, statusCodes } from "$lib/types/global";
 
 const DOMAIN = "DeleteCategoryByIdService" as const
 
@@ -33,12 +33,12 @@ export async function deleteCategoryByIdAsync(data: TDeleteCategoryByIdRequest)
 
         if (!deletedCategory) 
             return Result.failure({
-                code: STATUS_CODE.NOT_FOUND,
-                description: MESSAGES.NOT_FOUND("Category", categoryId),
+                code: statusCodes.NOT_FOUND,
+                description: messages.NOT_FOUND("Category", categoryId),
                 domain: DOMAIN
             })
         
-        return Result.success(STATUS_CODE.SUCCESS)
+        return Result.success(statusCodes.SUCCESS)
     } catch (error: unknown) {
         return Result.serverError(error, DOMAIN)
     }

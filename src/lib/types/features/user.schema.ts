@@ -14,8 +14,18 @@ export interface IUser {
     avatarPicture: { url: TCloudinaryFile }; 
 }
 
+export interface IGoogleIdTokenClaims {
+    sub: string;     
+    name: string;    
+    email: string;    
+    picture?: string; 
+}
+
 export type TSessionValidationResult = 
     { session: ISession; user: IUser } | 
     { session: null; user: null };
 
-export type LoginLogoutResponse = { message: string }
+export type LoginLogoutResponse = { 
+    message: string;
+    url?: string;
+}

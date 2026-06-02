@@ -7,6 +7,9 @@ export async function verifyAuthMiddleware({ event, resolve }: Parameters<Handle
 {
     const token = event.cookies.get(COOKIE_NAME.SESSION)
 
+    if (event.url.pathname.includes('/callback'))
+        return await resolve(event)
+
     if (token) {
         const result = await validateSessionTokenAsync(token)
 

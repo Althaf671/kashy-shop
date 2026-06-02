@@ -157,16 +157,17 @@ export const users = pgTable('users', {
 
 export const accounts = pgTable('account', {
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-    type: varchar('type').notNull(), 
     provider: varchar('provider').notNull(), 
     providerAccountId: varchar('provider_account_id').notNull(),
-    refresh_token: varchar('refresh_token'),
-    access_token: varchar('access_token'),
-    expires_at: integer('expires_at'),
-    token_type: varchar('token_type'),
-    scope: varchar('scope'),
-    id_token: varchar('id_token'),
-    session_state: varchar('session_state'),
+    // unavailable until i need to integrate Google APIs
+    // type: varchar('type').notNull(), 
+    // refresh_token: varchar('refresh_token'),
+    // access_token: varchar('access_token'),
+    // expires_at: integer('expires_at'),
+    // token_type: varchar('token_type'),
+    // scope: varchar('scope'),
+    // id_token: varchar('id_token'),
+    // session_state: varchar('session_state'),
 }, (table) => ([
     {
         pk: primaryKey({ columns: [table.provider, table.providerAccountId] }),

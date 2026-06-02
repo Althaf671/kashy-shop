@@ -3,16 +3,8 @@ CREATE TYPE "public"."payment_method" AS ENUM('qris', 'transfer', 'cash');--> st
 CREATE TYPE "public"."product_type" AS ENUM('pre_order', 'ready_stock');--> statement-breakpoint
 CREATE TABLE "account" (
 	"user_id" uuid NOT NULL,
-	"type" varchar NOT NULL,
 	"provider" varchar NOT NULL,
-	"provider_account_id" varchar NOT NULL,
-	"refresh_token" varchar,
-	"access_token" varchar,
-	"expires_at" integer,
-	"token_type" varchar,
-	"scope" varchar,
-	"id_token" varchar,
-	"session_state" varchar
+	"provider_account_id" varchar NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "categories" (
@@ -20,6 +12,7 @@ CREATE TABLE "categories" (
 	"name" varchar(100) NOT NULL,
 	"description" varchar(500) NOT NULL,
 	"thumbnail_picture" jsonb NOT NULL,
+	"is_soft_deleted" boolean DEFAULT false,
 	"slug" varchar(50) NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"created_at" timestamp with time zone DEFAULT now(),
@@ -32,6 +25,7 @@ CREATE TABLE "customers" (
 	"name" varchar(100) NOT NULL,
 	"phone_number" varchar(30) NOT NULL,
 	"instagram_url" varchar(2048),
+	"is_soft_deleted" boolean DEFAULT false,
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"created_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "customers_phone_number_unique" UNIQUE("phone_number")
@@ -51,13 +45,13 @@ CREATE TABLE "orders" (
 	"order_code" varchar(100) NOT NULL,
 	"status" "order_status" DEFAULT 'pending' NOT NULL,
 	"total_price" integer NOT NULL,
-	"payment_method" "payment_method" DEFAULT 'cash' NOT NULL,
+	"payment_method" "payment_method" DEFAULT 'cash',
 	"payment_proof" jsonb,
 	"note" varchar(500),
 	"admin_note" varchar(500),
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"created_at" timestamp with time zone DEFAULT now(),
-	"customer_id" uuid NOT NULL,
+	"customer_id" uuid,
 	CONSTRAINT "orders_order_code_unique" UNIQUE("order_code")
 );
 --> statement-breakpoint
@@ -71,6 +65,7 @@ CREATE TABLE "products" (
 	"stock" integer NOT NULL,
 	"type" "product_type" DEFAULT 'pre_order' NOT NULL,
 	"image_urls" jsonb NOT NULL,
+	"is_soft_deleted" boolean DEFAULT false,
 	"is_active" boolean DEFAULT true NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"created_at" timestamp with time zone DEFAULT now(),
@@ -100,5 +95,5 @@ ALTER TABLE "account" ADD CONSTRAINT "account_user_id_users_id_fk" FOREIGN KEY (
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "orders" ADD CONSTRAINT "orders_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "products" ADD CONSTRAINT "products_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "products" ADD CONSTRAINT "products_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;

@@ -13,7 +13,7 @@ export const MAX_RESIZE_DIMENSION = 800 as const
 export const FOLDER_NAME = "Kash_Storage" as const
 
 //--- Status Code -------------------------------
-export const STATUS_CODE = {
+export const statusCodes = {
     SERVER_ERROR: "SERVER_ERROR",
     NOT_FOUND: "NOT_FOUND",
     VALIDATION_ERROR: "VALIDATION_ERROR",
@@ -23,8 +23,18 @@ export const STATUS_CODE = {
     SUCCESS: "SUCCESS"
 } as const
 
+export const domainToHttpStatus: Record<keyof typeof statusCodes, number> = {
+    SUCCESS: 200,
+    BAD_REQUEST: 400,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    DUPLICATED: 409,
+    VALIDATION_ERROR: 422,
+    SERVER_ERROR: 500,
+} as const;
+
 //--- Messages ----------------------------------
-export const MESSAGES = {
+export const messages = {
     /** @returns `${entity} with ID: ${itemId} not found.` 
      * or @returns `${entity} not found.` 
      */
@@ -48,5 +58,5 @@ export const MESSAGES = {
 
         const { current, limit, comparison } = detailOrComparison;
         return `${entity} ${current} cannot be ${comparison} than ${limit}.`
-    }
+    },
 } as const

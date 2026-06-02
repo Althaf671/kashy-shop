@@ -24,7 +24,8 @@ export class TokenBucket<_Key> {
 
 		const refill = Math.floor((time.now() - bucket.refilledAt) / (this.refillIntervalSeconds * 1000));
 		if (refill > 0) {
-			return Math.min(bucket.count + refill, this.max) >= cost;
+			bucket.count = Math.min(bucket.count + refill, this.max)
+			bucket.refilledAt += refill * this.refillIntervalSeconds * 1000
 		}
 
 		return bucket.count >= cost; 
@@ -46,7 +47,7 @@ export class TokenBucket<_Key> {
 
 		if (refill > 0) {
 			bucket.count = Math.min(bucket.count + refill, this.max);
-			bucket.refilledAt = time.now();
+			bucket.refilledAt += refill* this.refillIntervalSeconds * 1000
 		}
 
 		if (bucket.count < cost) {
