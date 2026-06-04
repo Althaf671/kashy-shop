@@ -3,7 +3,8 @@ import { and, eq, ilike, or } from "drizzle-orm";
 import { cleanupPreviousFileAsync, findSpecificErrorValues, processAndUploadImageAsync } from "$lib/server/utils";
 import { CreateCategorySchema, type TCreateCategoryRequest, type TCreateCategoryResponse } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
-import { messages, statusCodes, type TCloudinaryFile } from "$lib/types/global";
+import { type TCloudinaryFile } from "$lib/types/global";
+import { messages, statusCodes } from "$lib/constants";
 
 const DOMAIN = "CategoryService" as const
 

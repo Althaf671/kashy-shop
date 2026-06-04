@@ -1,9 +1,9 @@
-// import { 
-//     // applySecurityHeadersMiddleware, 
-//     // checkPayloadSizeMiddleware, 
-//     // checkRateLimitMiddleware, 
-//     verifyAuthMiddleware 
-// } from "$lib/server/infrastructure/middlewares";
+import { 
+    applySecurityHeadersMiddleware, 
+    checkPayloadSizeMiddleware, 
+    checkRateLimitMiddleware, 
+    verifyAuthMiddleware 
+} from "$lib/server/infrastructure/middlewares";
 import type { Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
@@ -14,8 +14,8 @@ import { sequence } from "@sveltejs/kit/hooks";
 // }
 
 export const handle: Handle = sequence(
-    // verifyAuthMiddleware,
-    // applySecurityHeadersMiddleware,
-    // checkRateLimitMiddleware,
-    // checkPayloadSizeMiddleware,
+    applySecurityHeadersMiddleware,
+    checkRateLimitMiddleware,
+    verifyAuthMiddleware,
+    checkPayloadSizeMiddleware,
 )

@@ -1,6 +1,7 @@
+import { messages, statusCodes } from "$lib/constants";
 import { categories, db, products } from "$lib/server/data";
 import { GetProductByIdScheme, type TGetProductByIdRequest, type TGetProductByIdResponse } from "$lib/types/features";
-import { Result, STATUS_CODE } from "$lib/types/global";
+import { Result } from "$lib/types/global";
 import { and, eq } from "drizzle-orm";
 
 const DOMAIN = "GetProductDetailsByIdService"
@@ -47,8 +48,8 @@ export async function getProductbyIdAsync(data: TGetProductByIdRequest)
         
         if (!queryProduct)
             return Result.failure({
-                code: STATUS_CODE.NOT_FOUND,
-                description: `Product with ID: ${productId} not found.`,
+                code: statusCodes.NOT_FOUND,
+                description: messages.NOT_FOUND("Product", productId),
                 domain: DOMAIN
             })
 

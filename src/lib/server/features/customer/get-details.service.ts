@@ -1,6 +1,7 @@
+import { messages, statusCodes } from "$lib/constants";
 import { customers, db } from "$lib/server/data";
 import { GetCustomerByIdScheme, type TGetCustomerByIdRequest, type TGetCustomerByIdResponse } from "$lib/types/features";
-import { Result, STATUS_CODE } from "$lib/types/global";
+import { Result } from "$lib/types/global";
 import { and, eq } from "drizzle-orm";
 
 const DOMAIN = "GetCustomerByIdService" as const
@@ -32,8 +33,8 @@ export async function getCustomerByIdAsync(data: TGetCustomerByIdRequest)
 
         if (!queryCustomer)
             return Result.failure({
-                code: STATUS_CODE.NOT_FOUND,
-                description: `Customer with ID: ${customerId} not found.`,
+                code: statusCodes.NOT_FOUND,
+                description: messages.NOT_FOUND("Customer", customerId),
                 domain: DOMAIN
             })
 

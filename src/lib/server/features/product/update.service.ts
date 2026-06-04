@@ -1,8 +1,9 @@
 import { and, eq, ilike, ne, notInArray } from "drizzle-orm";
 import { db, orderItems, orders, products } from "$lib/server/data";
-import { Result, STATUS_CODE, type TCloudinaryFile } from "$lib/types/global";
+import { Result, type TCloudinaryFile } from "$lib/types/global";
 import { cleanupPreviousFileAsync, processAndUploadMultiImagesAsync } from "$lib/server/utils";
 import { UpdateProductByIdScheme, type TUpdateProductByIdRequest, type TUpdateProductByIdResponse } from "$lib/types/features";
+import { messages, statusCodes } from "$lib/constants";
 
 //--- update by id -------------------------------
 const DOMAIN = "UpdateProductService" as const
@@ -120,8 +121,8 @@ async function checkProductAvailabilityAsync(productId: string)
 
     if (!productRecord) 
         return Result.failure({
-            code: STATUS_CODE.NOT_FOUND,
-            description: `Product with ID: ${productId} not found.`,
+            code: statusCodes.NOT_FOUND,
+            description: messages.NOT_FOUND("Product", productId),
             domain: DOMAIN
         })
 
@@ -150,7 +151,7 @@ async function isProductInActiveOrdersAsync(productId: string)
 
     if (isProductOnActiveOrder)
         return Result.failure({
-            code: STATUS_CODE.FORBIDDEN,
+            code: statusCodes.FORBIDDEN,
             description: `Cannot update this product because there are active, unconfirmed customer orders associated with it.`,
             domain: DOMAIN
         })
@@ -174,8 +175,8 @@ async function isSlugDuplicatedAsync(productId: string, slug: string)
 
     if (isDuplicated) {
         return Result.failure({
-            code: STATUS_CODE.DUPLICATED,
-            description: `Product with slug: ${slug} is already exist.`,
+            code: statusCodes.DUPLICATED,
+            description: messages.DUPLICATED("Product", "slug", slug),
             domain: DOMAIN
         })
     }
@@ -200,7 +201,7 @@ async function isNameDuplicatedInCategoryAsync(productId: string, categoryId: st
 
     if (isDuplicated)
         return Result.failure({
-            code: STATUS_CODE.BAD_REQUEST,
+            code: statusCodes.BAD_REQUEST,
             description: `Product with name: ${name} is already exist in this category.`,
             domain: DOMAIN
         })

@@ -5,7 +5,7 @@ interface Bucket {
 	refilledAt: number;
 }
 
-export class TokenBucket<_Key> {
+export class TokenBucketRateLimit<_Key> {
     public max: number
     public refillIntervalSeconds: number
 
@@ -14,7 +14,7 @@ export class TokenBucket<_Key> {
         this.refillIntervalSeconds = refillIntervalSeconds
     }
 
-    private storage = new Map<_Key, Bucket>()
+    public storage = new Map<_Key, Bucket>()
 
 	public check(key: _Key, cost: number): boolean {
 		const bucket = this.storage.get(key) ?? null;
@@ -37,7 +37,7 @@ export class TokenBucket<_Key> {
 		if (bucket === null) {
 			bucket = {
 				count: this.max - cost,
-				refilledAt: time.now()
+				refilledAt: time.now(),
 			};
 			this.storage.set(key, bucket);
 			return true;
@@ -58,5 +58,9 @@ export class TokenBucket<_Key> {
 		bucket.count -= cost;
 		this.storage.set(key, bucket);
 		return true;
+	}
+
+	public getBucketState(key: _Key): Bucket | null {
+		return this.storage.get(key) ?? null
 	}
 }

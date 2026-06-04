@@ -1,5 +1,5 @@
+import { statusCodes } from "$lib/constants";
 import { toError } from "$lib/server/utils/general/error";
-import { STATUS_CODE } from "./constant.types";
 
 export type AppError = {
     readonly code: string;
@@ -51,7 +51,7 @@ export class Result<T> {
             .join(', ');
 
         return Result.failure<T>({
-            code: STATUS_CODE.VALIDATION_ERROR,
+            code: statusCodes.VALIDATION_ERROR,
             description: errMessage,
             domain
         });
@@ -59,7 +59,7 @@ export class Result<T> {
 
     public static serverError<T = unknown>(error: unknown, domain: string): Result<T> {
         return Result.failure<T>({
-            code: STATUS_CODE.SERVER_ERROR,
+            code: statusCodes.SERVER_ERROR,
             description: toError(error).message, 
             domain
         });

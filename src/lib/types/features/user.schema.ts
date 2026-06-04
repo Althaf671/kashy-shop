@@ -27,5 +27,5 @@ export type TSessionValidationResult =
 
 export type LoginLogoutResponse = { 
     message: string;
-    url?: string;
+    url: string;
 }

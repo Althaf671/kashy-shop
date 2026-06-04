@@ -1,17 +1,15 @@
 import { loginWithGoogleAuthorizationCallbackAsync } from "$lib/server/infrastructure/identity/auth.service";
 import { redirect } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
-import { setSessionTokenCookie } from "$lib/server/infrastructure/http/cookies/session-cookies";
+import { authRoutes } from "$lib/constants/route";
 
 export async function GET(event: RequestEvent): Promise<Response> {
     const callbackResult = await loginWithGoogleAuthorizationCallbackAsync(event)
 
     if (callbackResult.isFailure) {
         const errorMsg = encodeURIComponent(callbackResult.error.description!)
-        throw redirect(302, `/login?error=${errorMsg}`)
+        throw redirect(302, `${authRoutes.REDIRECT_TO_LOGIN}?error=${errorMsg}`)
     }
-
-    setSessionTokenCookie(event, callbackResult.value.token, callbackResult.value.expiresAt)
 
     throw redirect(302, callbackResult.value.url!)
 }

@@ -23,3 +23,17 @@ export function setGoogleCodeVerifierCookie(event: RequestEvent, codeVerifier: s
         expires: new Date(time.now() + time.inMinutes(10)) 
     })
 }
+
+// remove OAuth state cookie
+export function removeGoogleOAuthStateCookie(event: RequestEvent): void {
+    event.cookies.delete(COOKIE_NAME.GOOGLE_OAUTH_STATE, {
+        path: COOKIE_CONSTRAINT.SESSION.path
+    })
+}
+
+// remove code verifier cookie
+export function removeGoogleCodeVerifierCookie(event: RequestEvent): void {
+    event.cookies.delete(COOKIE_NAME.GOOGLE_CODE_VERIFIER, {
+        path: COOKIE_CONSTRAINT.SESSION.path
+    })
+}

@@ -2,7 +2,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { Result } from "$lib/types/global/result.types";
 import { DeleteCategoryByIdSchema, type TDeleteCategoryByIdRequest } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
-import { messages, statusCodes } from "$lib/types/global";
+import { messages, statusCodes } from "$lib/constants";
 
 const DOMAIN = "DeleteCategoryByIdService" as const
 

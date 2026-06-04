@@ -1,4 +1,4 @@
-import { MAX_RESIZE_DIMENSION } from "$lib/types/global/constant.types";
+import { MAX_RESIZE_DIMENSION } from "$lib/constants";
 import { Result } from "$lib/types/global/result.types";
 import sharp from "sharp";
 

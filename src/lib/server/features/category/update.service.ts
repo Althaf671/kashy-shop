@@ -1,10 +1,10 @@
 import { Result } from "$lib/types/global/result.types";
 import { and, eq, ne } from "drizzle-orm";
-import { STATUS_CODE } from "$lib/types/global/constant.types";
 import { cleanupPreviousFileAsync, processAndUploadImageAsync } from "$lib/server/utils";
 import { UpdateCategoryByIdSchema, type TUpdateCategoryByIdRequest, type TUpdateCategoryByIdResponse } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
-import { MESSAGES, type TCloudinaryFile } from "$lib/types/global";
+import type { TCloudinaryFile } from "$lib/types/global";
+import { messages, statusCodes } from "$lib/constants";
 
 const DOMAIN = "UpdateCategoryByIdService" as const
 
@@ -95,8 +95,8 @@ async function isCategoryAvailableAsync(categoryId: string)
 
     if (!categoryRecord) 
         return Result.failure({
-            code: STATUS_CODE.NOT_FOUND,
-            description: MESSAGES.NOT_FOUND("Category", categoryId),
+            code: statusCodes.NOT_FOUND,
+            description: messages.NOT_FOUND("Category", categoryId),
             domain: DOMAIN
         })
 
@@ -115,8 +115,8 @@ async function isSlugDuplicatedAsync(categoryId: string, slug: string): Promise<
 
     if (isDuplicated)
         return Result.failure({
-            code: STATUS_CODE.DUPLICATED,
-            description: MESSAGES.NOT_FOUND("Category", categoryId),
+            code: statusCodes.DUPLICATED,
+            description: messages.NOT_FOUND("Category", categoryId),
             domain: DOMAIN
         })
 
@@ -135,8 +135,8 @@ async function isNameDuplicatedAsync(categoryId: string, name: string): Promise<
 
     if (isDuplicated)
         return Result.failure({
-            code: STATUS_CODE.DUPLICATED,
-            description: MESSAGES.DUPLICATED("Category", "name", name),
+            code: statusCodes.DUPLICATED,
+            description: messages.DUPLICATED("Category", "name", name),
             domain: DOMAIN
         })
 

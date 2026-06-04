@@ -1,7 +1,7 @@
-import type { UploadApiResponse } from "cloudinary";
-import type { UploadApiErrorResponse } from "cloudinary";
-import { cloudinary } from "../../config/interceptor/cloudinary";
-import { FOLDER_NAME, Result,type TCloudinaryFile } from "$lib/types/global"; 
+import type { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
+import { Result,type TCloudinaryFile } from "$lib/types/global"; 
+import { cloudinary } from "$lib/server/config/cloudinary";
+import { FOLDER_NAME } from "$lib/constants";
 
 export async function uploadFileAsync(buffer: Buffer)
     : Promise<Result<TCloudinaryFile>>

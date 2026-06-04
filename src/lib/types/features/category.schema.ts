@@ -1,7 +1,8 @@
-import { ACCEPTED_IMAGE_TYPES, KASH, MAX_FILE_SIZE } from "$lib/types/global/constant.types";
 import { z } from "zod";
 import type { TCloudinaryFile } from "../global";
 import { CATEGORIES_CONSTRAINT } from "$lib/server/data";
+import { ACCEPTED_IMAGE_TYPES, KASH } from "$lib/constants";
+import { size } from "$lib/server/utils/general/size";
 
 //--- create -------------------------------------
 export const CreateCategorySchema = z.object({
@@ -17,7 +18,7 @@ export const CreateCategorySchema = z.object({
         .max(CATEGORIES_CONSTRAINT.descriptionLength, `Maximum ${CATEGORIES_CONSTRAINT.descriptionLength} characters, ${KASH}.`),
     thumbnailPicture: z
         .file()
-        .max(MAX_FILE_SIZE, `Maximum file size is 2MB, ${KASH}.`)
+        .max(size.inMB(2), `Maximum file size is 2MB, ${KASH}.`)
         .mime(ACCEPTED_IMAGE_TYPES, `File format is must between JPG, JPEG, or WEBP, ${KASH}.`),
     slug: z
         .string()

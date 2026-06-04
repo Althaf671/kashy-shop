@@ -1,5 +1,6 @@
+import { ACCEPTED_IMAGE_TYPES, KASH, type TAcceptedImages } from "$lib/constants";
 import { PRODUCTS_CONSTRAINT } from "$lib/server/data";
-import { ACCEPTED_IMAGE_TYPES, KASH, MAX_FILE_SIZE, type TAcceptedImages } from "$lib/types/global/constant.types";
+import { size } from "$lib/server/utils/general/size";
 import { PRODUCT_TYPE, type TCloudinaryFile, type TProductType } from "$lib/types/global/shared.types";
 import { z } from "zod";
 
@@ -16,7 +17,7 @@ export const CreateProductScheme = z.object({
         .max(PRODUCTS_CONSTRAINT.descriptionLength, `Maximum ${PRODUCTS_CONSTRAINT.descriptionLength} characters, ${KASH}.`),
     thumbnailPicture: z
         .file()
-        .max(MAX_FILE_SIZE, `Maximum file size is 2MB, ${KASH}.`)
+        .max(size.inMB(2), `Maximum file size is 2MB, ${KASH}.`)
         .mime(ACCEPTED_IMAGE_TYPES, `File format is must between JPG, JPEG, or WEBP, ${KASH}.`),
     slug: z
         .string()
@@ -43,7 +44,7 @@ export const CreateProductScheme = z.object({
         .min(1, { message: `Must input atleast 1 file, ${KASH}.` })
         .max(5, { message: `Maximum file input is 5, ${KASH}.` })
         .refine((files) => 
-            files.every((file) => file.size <= MAX_FILE_SIZE, `Maximum file size is 2MB, ${KASH}.`))
+            files.every((file) => file.size <= size.inMB(2), `Maximum file size is 2MB, ${KASH}.`))
         .refine((files) => 
             files.every((file) => ACCEPTED_IMAGE_TYPES.includes(file.type as TAcceptedImages), `File format is must between JPG, JPEG, or WEBP, ${KASH}.`)),
     isActive: z.boolean("You did not input a parameter with type of boolean.").default(true),

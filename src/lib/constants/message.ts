@@ -1,38 +1,6 @@
 //--- Kashley -----------------------------------
 export const KASH = "Kash" as const;
 
-//--- File validation ---------------------------
-export const MAX_FILE_SIZE = 2 * 1024 * 1024;
-export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/webp"] as string[];
-export type TAcceptedImages = typeof ACCEPTED_IMAGE_TYPES[number]
-
-//--- File converter ----------------------------
-export const MAX_RESIZE_DIMENSION = 800 as const
-
-//--- File storage ------------------------------
-export const FOLDER_NAME = "Kash_Storage" as const
-
-//--- Status Code -------------------------------
-export const statusCodes = {
-    SERVER_ERROR: "SERVER_ERROR",
-    NOT_FOUND: "NOT_FOUND",
-    VALIDATION_ERROR: "VALIDATION_ERROR",
-    DUPLICATED: "DUPLICATED",
-    BAD_REQUEST: "BAD_REQUEST",
-    FORBIDDEN: "FORBIDDEN",
-    SUCCESS: "SUCCESS"
-} as const
-
-export const domainToHttpStatus: Record<keyof typeof statusCodes, number> = {
-    SUCCESS: 200,
-    BAD_REQUEST: 400,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-    DUPLICATED: 409,
-    VALIDATION_ERROR: 422,
-    SERVER_ERROR: 500,
-} as const;
-
 //--- Messages ----------------------------------
 export const messages = {
     /** @returns `${entity} with ID: ${itemId} not found.` 
@@ -59,4 +27,7 @@ export const messages = {
         const { current, limit, comparison } = detailOrComparison;
         return `${entity} ${current} cannot be ${comparison} than ${limit}.`
     },
+    TO_MANY_REQUEST(minutes: number): string { 
+        return `Slow down, You are attempting to many request, try again within ${minutes} minutes.`
+    }
 } as const

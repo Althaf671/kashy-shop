@@ -1,8 +1,9 @@
 import { and, eq, ilike, or } from "drizzle-orm";
 import { categories, db, products } from "$lib/server/data";
-import { KASH, Result, STATUS_CODE, type TCloudinaryFile } from "$lib/types/global";
 import { cleanupPreviousFileAsync, findSpecificErrorValues, processAndUploadMultiImagesAsync } from "$lib/server/utils";
 import { CreateProductScheme, type TCreateProductRequest, type TCreateProductResponse } from "$lib/types/features";
+import { Result, type TCloudinaryFile } from "$lib/types/global";
+import { messages, statusCodes } from "$lib/constants";
 
 
 //--- create -------------------------------------
@@ -81,8 +82,8 @@ async function isAssociateCategoryExistAsync(categoryId: string)
 
     if (!isCategoryExist)
         return Result.failure({
-            code: STATUS_CODE.NOT_FOUND,
-            description: `Category with ID: ${categoryId} not found.`,
+            code: statusCodes.NOT_FOUND,
+            description: messages.NOT_FOUND("Category", categoryId),
             domain: DOMAIN
         })
 
@@ -118,11 +119,10 @@ async function checkDuplicateSlugAndNameInCategoryAsync(categoryId: string, name
             { ori: isDuplicated.name, current: name },
             { ori: isDuplicated.slug, current: slug },
         )
-        const errMsg = `Category with ${specificReason} already exists, ${KASH}.`
 
         return Result.failure({
-            code: STATUS_CODE.DUPLICATED,
-            description: `Field with value ${errMsg} already exist, use another one.`,
+            code: statusCodes.DUPLICATED,
+            description: messages.DUPLICATED("Slug or Name", "value", specificReason),
             domain: DOMAIN
         })
     }

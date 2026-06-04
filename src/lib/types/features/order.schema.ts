@@ -1,5 +1,6 @@
+import { ACCEPTED_IMAGE_TYPES } from "$lib/constants";
 import { CUSTOMERS_CONSTRAINT, ORDER_CONSTRAINT, ORDERITEMS_CONSTRAINT } from "$lib/server/data";
-import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "$lib/types/global/constant.types";
+import { size } from "$lib/server/utils/general/size";
 import { ORDER_STATUS, PAYMENT_METHOD, type TCloudinaryFile, type TOrderStatus, type TPaymentMethod } from "$lib/types/global/shared.types";
 import { z } from "zod";
 
@@ -71,7 +72,7 @@ export const PayOrderScheme = z.object({
     paymentMethod: z.enum(PAYMENT_METHOD),
     paymentProof: z
         .file()
-        .max(MAX_FILE_SIZE, `Maximum file size is 2MB.`)
+        .max(size.inMB(2), `Maximum file size is 2MB.`)
         .mime(ACCEPTED_IMAGE_TYPES, `File format is must between JPG, JPEG, or WEBP.`)
         .optional(),
 })

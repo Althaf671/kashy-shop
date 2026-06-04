@@ -1,15 +1,23 @@
 import { COOKIE_NAME } from "$lib/server/config/cookie";
-import { Result, statusCodes } from "$lib/types/global";
 import type { RequestEvent } from "@sveltejs/kit";
 import { clearAuthSession, createSessionAsync, generateSessionToken, invalidateSessionAsync, invalidateUserSessionsAsync } from "./session";
 import type { IGoogleIdTokenClaims, LoginLogoutResponse } from "$lib/types/features";
 import { decodeIdToken, generateCodeVerifier, generateState, OAuth2Tokens } from "arctic";
 import { authMessages, google, googleOAuthScopes } from "$lib/server/config/google";
-import { setGoogleCodeVerifierCookie, setGoogleOAuthStateCookie } from "../http/cookies/google-cookies";
+import { removeGoogleCodeVerifierCookie, removeGoogleOAuthStateCookie, setGoogleCodeVerifierCookie, setGoogleOAuthStateCookie } from "../http/cookies/google-cookies";
 import { accounts, db } from "$lib/server/data";
 import { eq } from "drizzle-orm";
+import { setSessionTokenCookie } from "../http/cookies/session-cookies";
+import { authRoutes, protectedRoutes } from "$lib/constants/route";
+import { Result } from "$lib/types/global";
+import { statusCodes } from "$lib/constants";
+import { ENV } from "$lib/server/config/env";
 
 const DOMAIN = "AuthService" as const
+
+function isEmailWhitelist(email: string): boolean {
+    return email.toLowerCase() === ENV.WHITELIST_EMAIL.toLowerCase()
+}
 
 export function loginWithGoogleAuthorization(event: RequestEvent): Result<LoginLogoutResponse> {
     const state = generateState()
@@ -27,12 +35,7 @@ export function loginWithGoogleAuthorization(event: RequestEvent): Result<LoginL
 }
 
 export async function loginWithGoogleAuthorizationCallbackAsync(event: RequestEvent)
-    : Promise<Result<{   
-        message: string;
-        url: string;
-        token: string;
-        expiresAt: Date 
-    }>> 
+    : Promise<Result<LoginLogoutResponse>> 
 {
     const code = event.url.searchParams.get("code")
     const state = event.url.searchParams.get("state")
@@ -68,6 +71,14 @@ export async function loginWithGoogleAuthorizationCallbackAsync(event: RequestEv
     }
 
     const claims = decodeIdToken(tokens.idToken()) as IGoogleIdTokenClaims
+    
+    if (!isEmailWhitelist(claims.email))
+        return Result.failure({
+            code: statusCodes.FORBIDDEN,
+            description: authMessages.FORBBIDEN,
+            domain: DOMAIN
+        })
+
     const googleUserid = claims.sub
 
     const [existingUserIdentity] = await db
@@ -79,11 +90,14 @@ export async function loginWithGoogleAuthorizationCallbackAsync(event: RequestEv
     if (existingUserIdentity) {
         const sessionToken = generateSessionToken()
         const session = await createSessionAsync(sessionToken, existingUserIdentity.id)
+
+        setSessionTokenCookie(event, sessionToken, session.expiresAt)
+        removeGoogleOAuthStateCookie(event)
+        removeGoogleCodeVerifierCookie(event)
+
         return Result.success({
             message: authMessages.AUTHORIZATION_GRANTED,
-            token: session.token,
-            expiresAt: session.expiresAt,
-            url: "/"
+            url: protectedRoutes.DASHBOARD
         })
     } else {
         return Result.failure({
@@ -94,7 +108,7 @@ export async function loginWithGoogleAuthorizationCallbackAsync(event: RequestEv
     }
 }
 
-export async function logout(event: RequestEvent): Promise<Result<LoginLogoutResponse>> {
+export async function logoutAsync(event: RequestEvent): Promise<Result<LoginLogoutResponse>> {
     const token = event.cookies.get(COOKIE_NAME.SESSION)
 
     try {
@@ -104,13 +118,16 @@ export async function logout(event: RequestEvent): Promise<Result<LoginLogoutRes
 
         clearAuthSession(event)
 
-        return Result.success({ message: "Logged out successfully" })
+        return Result.success({ 
+            message: "Logged out successfully",
+            url: authRoutes.REDIRECT_TO_LOGIN
+        })
     } catch (error: unknown) {
         return Result.serverError(error, DOMAIN)
     }
 }
 
-export async function logoutAll(event: RequestEvent): Promise<Result<LoginLogoutResponse>> {
+export async function logoutAllAsync(event: RequestEvent): Promise<Result<LoginLogoutResponse>> {
     const userId = event.locals.user?.id
 
     try {
@@ -120,7 +137,10 @@ export async function logoutAll(event: RequestEvent): Promise<Result<LoginLogout
 
         clearAuthSession(event)
 
-        return Result.success({ message: "Logged out from all devices successfully" })
+        return Result.success({ 
+            message: "Logged out from all devices successfully",
+            url: authRoutes.REDIRECT_TO_LOGIN
+        })
     } catch (error: unknown) {
         return Result.serverError(error, DOMAIN)
     }

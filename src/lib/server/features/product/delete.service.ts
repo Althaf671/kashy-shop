@@ -1,6 +1,7 @@
+import { messages, statusCodes } from "$lib/constants";
 import { db, orderItems, orders, products } from "$lib/server/data";
 import { DeleteProductByIdScheme, type TDeleteProductByIdRequest } from "$lib/types/features";
-import { Result, STATUS_CODE } from "$lib/types/global";
+import { Result } from "$lib/types/global";
 import { and, eq, notInArray, sql } from "drizzle-orm";
 
 const DOMAIN = "DeleteProductService" as const
@@ -32,8 +33,8 @@ export async function deleteProductByIdAsync(data: TDeleteProductByIdRequest)
             .returning({ id: products.id })
         if (!deletedProduct) 
             return Result.failure({
-                code: STATUS_CODE.NOT_FOUND,
-                description: `Product with ID: ${productId} not found.`,
+                code: statusCodes.NOT_FOUND,
+                description: messages.NOT_FOUND("Product", productId),
                 domain: DOMAIN
             })
 
@@ -57,14 +58,14 @@ async function isProductAvailableAsync(productId: string): Promise<Result<boolea
 
     if (!productRecord) 
         return Result.failure({
-            code: STATUS_CODE.NOT_FOUND,
-            description: `Product with ID: ${productId} not found.`,
+            code: statusCodes.NOT_FOUND,
+            description: messages.NOT_FOUND("Product", productId),
             domain: DOMAIN
         })
 
     if (productRecord.isActive)
         return Result.failure({
-            code: STATUS_CODE.BAD_REQUEST,
+            code: statusCodes.BAD_REQUEST,
             description: `You can't delete this product while it is still active. Please deactivate it first.`,
             domain: DOMAIN
         })
@@ -88,7 +89,7 @@ async function isProductInActiveOrdersAsync(productId: string)
 
     if (isProductOnActiveOrder)
         return Result.failure({
-            code: STATUS_CODE.FORBIDDEN,
+            code: statusCodes.FORBIDDEN,
             description: `Cannot delete this product because there are active, unconfirmed customer orders associated with it.`,
             domain: DOMAIN
         })

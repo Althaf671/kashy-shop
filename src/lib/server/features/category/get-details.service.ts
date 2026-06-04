@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { Result } from "$lib/types/global/result.types";
 import { GetCategoryByIdSchema, type TGetCategoryByIdRequest, type TGetCategoryByIdResponse } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
-import { statusCodes } from "$lib/types/global";
+import { statusCodes } from "$lib/constants";
 
 const DOMAIN = "GetCategoryByIdService" as const
 
