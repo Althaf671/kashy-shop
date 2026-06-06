@@ -7,6 +7,6 @@ export const rateLimitConstraint = {
     },
     dashboardRequestLimit: {
         minutes: time.inMinutes(1),
-        attemps: 50
+        attemps: 250
     }
 } as const
