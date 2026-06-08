@@ -3,7 +3,7 @@ import type { Handle } from "@sveltejs/kit";
 
 export async function checkPayloadSizeMiddleware({ event, resolve }: Parameters<Handle>[0]) {
     let MAX_PAYLOAD = size.inMB(2)
-    let max = 2;
+    let max = 2
 
     const isCreateProductForm = event.url.pathname === '/dashboard/shop-management/create'
     if (isCreateProductForm) {

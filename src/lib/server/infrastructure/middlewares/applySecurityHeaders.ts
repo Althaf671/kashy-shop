@@ -6,6 +6,5 @@ export async function applySecurityHeadersMiddleware({ event, resolve }: Paramet
     Object.entries(securityHeaders).forEach(
         ([headers, value]) => response.headers.set(headers, value)
     )
-
     return response
 }

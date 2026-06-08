@@ -74,8 +74,8 @@ export async function loginWithGoogleAuthorizationCallbackAsync(event: RequestEv
     
     if (!isEmailWhitelist(claims.email))
         return Result.failure({
-            code: statusCodes.FORBIDDEN,
-            description: authMessages.FORBBIDEN,
+            code: statusCodes.UNAUTHENTICATED,
+            description: authMessages.UNAUTHENTICATED,
             domain: DOMAIN
         })
 
@@ -101,8 +101,8 @@ export async function loginWithGoogleAuthorizationCallbackAsync(event: RequestEv
         })
     } else {
         return Result.failure({
-            code: statusCodes.FORBIDDEN,
-            description: authMessages.FORBBIDEN,
+            code: statusCodes.UNAUTHENTICATED,
+            description: authMessages.UNAUTHENTICATED,
             domain: DOMAIN
         })
     }
