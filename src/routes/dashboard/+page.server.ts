@@ -1,22 +1,29 @@
 import { getDashboardAggregateDataAsync } from "$lib/server/features/aggregate/dashboard.service";
 import type { IUser } from "$lib/types/features";
 import type { IMetricItem, TCardProps } from "$lib/types/global/ui.types";
-import { DashboardCircleIcon, DeliverySent01Icon, EuroCircleIcon, Package02Icon } from "@hugeicons/core-free-icons";
 import type { Actions, PageServerLoad } from "./$types";
 import { Result } from "$lib";
+import { getIconForMetric } from "$lib/utils/icon-manager";
 
-export async function load(event: Parameters<PageServerLoad>[0]) {
-    // return { user: event.locals.user } satisfies { user: IUser | null };
-
+export async function load(event: Parameters<PageServerLoad>[0])
+    : Promise<{ metrics: TCardProps[], error?: unknown }> 
+{
+    //-- metric data and icon
     const metricData = await getDashboardAggregateDataAsync()
-    if (metricData.isFailure) return Result.failure(metricData.error)
+    console.log(metricData.error.description)
+    if (metricData.isFailure) {
+        return {
+            metrics: [],
+            error: metricData.error.description
+        }
+    }
     
     const metricProps: TCardProps[] = metricData.value.map((data) => ({
         type: "metric",
         item: { 
             name: data?.allTimeData?.name, 
             value: data?.allTimeData?.totalValue, 
-            icon: DashboardCircleIcon,
+            icon: getIconForMetric(data.allTimeData!.name),
             progress: { 
                 value: data?.allTimeData?.progress.value,
                 trend: data?.allTimeData?.progress.trend
@@ -24,9 +31,9 @@ export async function load(event: Parameters<PageServerLoad>[0]) {
         } as IMetricItem 
     }))
 
-    return {
-        metrics: metricProps
-    };
+    //-- chart data
+
+    return { metrics: metricProps }
 }
 
 export const actions: Actions = {

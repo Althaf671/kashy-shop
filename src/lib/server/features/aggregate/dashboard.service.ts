@@ -10,16 +10,24 @@ const DOMAIN = "DashboardService" as const
 export async function getDashboardAggregateDataAsync()
     : Promise<Result<TDashboardData[]>> 
 {    
+    console.log("Initiating get dashboard aggregate data.")
+
     try {
+        console.log("Entering the try catch block.")
+
         // get sales aggregate 
 
         // get category aggregate
         const categoryData = await getCategoryAggregateDataAsync()
         if (categoryData.isFailure) return Result.failure(categoryData.error)
 
+        console.log(JSON.stringify(categoryData))
+
         // get active product aggregate
         const productData = await getActiveProductAggregateDataAsync()
         if (productData.isFailure) return Result.failure(productData.error)
+
+        console.log(JSON.stringify(productData))
 
         // get completed order aggregate
 
@@ -61,6 +69,8 @@ export async function getDashboardAggregateDataAsync()
 
 //--- get category aggregate ------------
 async function getCategoryAggregateDataAsync(): Promise<Result<TDashboardData>> {
+    console.log("Running get category aggregate.")
+
     const [categoryStats] = await db
         .select({ 
             totalCount: sql<number>`COUNT (*)`,
@@ -71,6 +81,8 @@ async function getCategoryAggregateDataAsync(): Promise<Result<TDashboardData>> 
         })
         .from(categories)
         .where(eq(categories.isSoftDeleted, false))
+
+    console.log("Receiving query category stats: ", JSON.stringify(categoryStats))
 
     // conver SQL string into number
     const totalCategoryCount = Number(categoryStats.totalCount ?? 0)

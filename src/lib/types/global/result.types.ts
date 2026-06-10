@@ -61,7 +61,7 @@ export class Result<T> {
         return Result.failure<T>({
             code: statusCodes.SERVER_ERROR,
             description: toError(error).message, 
-            domain
+            domain: domain
         });
     }
 }
