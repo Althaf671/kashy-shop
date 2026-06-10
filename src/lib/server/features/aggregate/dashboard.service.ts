@@ -21,13 +21,9 @@ export async function getDashboardAggregateDataAsync()
         const categoryData = await getCategoryAggregateDataAsync()
         if (categoryData.isFailure) return Result.failure(categoryData.error)
 
-        console.log(JSON.stringify(categoryData))
-
         // get active product aggregate
         const productData = await getActiveProductAggregateDataAsync()
         if (productData.isFailure) return Result.failure(productData.error)
-
-        console.log(JSON.stringify(productData))
 
         // get completed order aggregate
 
@@ -69,52 +65,116 @@ export async function getDashboardAggregateDataAsync()
 
 //--- get category aggregate ------------
 async function getCategoryAggregateDataAsync(): Promise<Result<TDashboardData>> {
-    console.log("Running get category aggregate.")
+    // yesterday to today range
+    const startOfToday = metricTime.rangeBetweenTodayAndYesterday().startOfToday
+    const startOfYesterday = metricTime.rangeBetweenTodayAndYesterday().startOfYesterday
+
+    // last to current week range
+    const startOfCurrentWeek = metricTime.rangeBetweenCurrentWeekAndLastWeek().startOfCurrentWeek
+    const startOfLastWeek = metricTime.rangeBetweenCurrentWeekAndLastWeek().startOfLastWeek
+
+    // last to current month range
+    const startOfCurrentMonth = metricTime.rangeBetweenCurrentMonthAndLastMonth().startOfCurrentMonth
+    const startOfLastMonth = metricTime.rangeBetweenCurrentMonthAndLastMonth().startOfLastMonth
 
     const [categoryStats] = await db
-        .select({ 
+        .select({
             totalCount: sql<number>`COUNT (*)`,
-            todayCount: sql<number>`SUM(CASE WHEN ${categories.createdAt} = ${metricTime.today} THEN 1 ELSE 0 END)`, 
-            yesterdayCount: sql<number>`SUM(CASE WHEN ${categories.createdAt} > ${metricTime.oneDayAgo} THEN 1 ELSE 0 END)`,
-            lastWeekCount: sql<number>`SUM(CASE WHEN ${categories.createdAt} > ${metricTime.oneWeekAgo} THEN 1 ELSE 0 END)`,
-            lastMonthCount: sql<number>`SUM(CASE WHEN ${categories.createdAt} > ${metricTime.oneMonthAgo} THEN 1 ELSE 0 END)`
+            yesterdayCount: sql<number>`
+                SUM(CASE 
+                    WHEN ${categories.createdAt} >= ${startOfYesterday} AND ${categories.createdAt} <= ${startOfToday} 
+                    THEN 1 
+                    ELSE 0 
+                END)`, 
+            lastWeekCount: sql<number>`
+                SUM(CASE
+                    WHEN ${categories.createdAt} >= ${startOfLastWeek} AND ${categories.createdAt} <= ${startOfCurrentWeek}
+                    THEN 1
+                    ELSE 0
+                END)`,
+            lastMonthCount: sql<number>`
+                SUM(CASE
+                    WHEN ${categories.createdAt} >= ${startOfLastMonth} AND ${categories.createdAt} <= ${startOfCurrentMonth}
+                    THEN 1
+                    ELSE 0
+                END)`
         })
         .from(categories)
         .where(eq(categories.isSoftDeleted, false))
 
-    console.log("Receiving query category stats: ", JSON.stringify(categoryStats))
-
     // conver SQL string into number
     const totalCategoryCount = Number(categoryStats.totalCount ?? 0)
-    const todayCategoryCount = Number(categoryStats.todayCount ?? 0)
-    const yesterCategorydayCount = Number(categoryStats.yesterdayCount ?? 0)
+    const yesterdayCategoryCount = Number(categoryStats.yesterdayCount ?? 0)
     const lastWeekCategoryCount = Number(categoryStats.lastWeekCount ?? 0)
     const lastMonthCategoryCount = Number(categoryStats.lastMonthCount ?? 0)
 
     // map the result
-    const categoryData: TDashboardData = {
+    const CATEGORIES = "Categories" as const
+    const productData: TDashboardData = {
         allTimeData: {
-            name: "Categories",
+            name: CATEGORIES,
             totalValue: totalCategoryCount,
             progress: {
-                trend: getProgressTrend(todayCategoryCount, yesterCategorydayCount),
-                value: yesterCategorydayCount
+                trend: getProgressTrend(totalCategoryCount, yesterdayCategoryCount),
+                value: yesterdayCategoryCount
+            } 
+        },
+        thisWeekData: {
+            name: CATEGORIES,
+            totalValue: lastWeekCategoryCount,
+            progress: {
+                trend: getProgressTrend(totalCategoryCount, lastWeekCategoryCount),
+                value: lastWeekCategoryCount
+            }
+        },
+        thisMonthData: {
+            name: CATEGORIES,
+            totalValue: lastMonthCategoryCount,
+            progress: {
+                trend: getProgressTrend(totalCategoryCount, lastMonthCategoryCount),
+                value: lastMonthCategoryCount
             }
         }
     }
 
-    return Result.success(categoryData)
+    return Result.success(productData)
 }
 
 //--- get active product aggregate ------
 async function getActiveProductAggregateDataAsync(): Promise<Result<TDashboardData>> {
+    // yesterday to today range
+    const startOfToday = metricTime.rangeBetweenTodayAndYesterday().startOfToday
+    const startOfYesterday = metricTime.rangeBetweenTodayAndYesterday().startOfYesterday
+
+    // last to current week range
+    const startOfCurrentWeek = metricTime.rangeBetweenCurrentWeekAndLastWeek().startOfCurrentWeek
+    const startOfLastWeek = metricTime.rangeBetweenCurrentWeekAndLastWeek().startOfLastWeek
+
+    // last to current month range
+    const startOfCurrentMonth = metricTime.rangeBetweenCurrentMonthAndLastMonth().startOfCurrentMonth
+    const startOfLastMonth = metricTime.rangeBetweenCurrentMonthAndLastMonth().startOfLastMonth
+
     const [productStats] = await db
         .select({
             totalCount: sql<number>`COUNT (*)`,
-            todayCount: sql<number>`SUM(CASE WHEN ${products.createdAt} = ${metricTime.today} THEN 1 ELSE 0 END)`, 
-            yesterdayCount: sql<number>`COUNT (CASE WHEN ${products.createdAt} > ${metricTime.oneDayAgo} THEN 1 END)`,
-            lastWeekCount: sql<number>`SUM(CASE WHEN ${products.createdAt} > ${metricTime.oneWeekAgo} THEN 1 ELSE 0 END)`,
-            lastMonthCount: sql<number>`SUM(CASE WHEN ${products.createdAt} > ${metricTime.oneMonthAgo} THEN 1 ELSE 0 END)`
+            yesterdayCount: sql<number>`
+                SUM(CASE 
+                    WHEN ${products.createdAt} >= ${startOfYesterday} AND ${products.createdAt} <= ${startOfToday} 
+                    THEN 1 
+                    ELSE 0 
+                END)`, 
+            lastWeekCount: sql<number>`
+                SUM(CASE
+                    WHEN ${products.createdAt} >= ${startOfLastWeek} AND ${products.createdAt} <= ${startOfCurrentWeek}
+                    THEN 1
+                    ELSE 0
+                END)`,
+            lastMonthCount: sql<number>`
+                SUM(CASE
+                    WHEN ${products.createdAt} >= ${startOfLastMonth} AND ${products.createdAt} <= ${startOfCurrentMonth}
+                    THEN 1
+                    ELSE 0
+                END)`
         })
         .from(products)
         .where(and(
@@ -124,20 +184,36 @@ async function getActiveProductAggregateDataAsync(): Promise<Result<TDashboardDa
 
     // conver SQL string into number
     const totalProductCount = Number(productStats.totalCount ?? 0)
-    const todayProductCount = Number(productStats.todayCount ?? 0)
     const yesterdayProductCount = Number(productStats.yesterdayCount ?? 0)
     const lastWeekProductCount = Number(productStats.lastWeekCount ?? 0)
     const lastMonthProductCount = Number(productStats.lastMonthCount ?? 0)
 
     // map the result
+    const ACTIVE_PRODUCTS = "Active Products" as const
     const productData: TDashboardData = {
         allTimeData: {
-            name: "Active Products",
+            name: ACTIVE_PRODUCTS,
             totalValue: totalProductCount,
             progress: {
-                trend: getProgressTrend(todayProductCount, yesterdayProductCount),
+                trend: getProgressTrend(totalProductCount, yesterdayProductCount),
                 value: yesterdayProductCount
             } 
+        },
+        thisWeekData: {
+            name: ACTIVE_PRODUCTS,
+            totalValue: lastWeekProductCount,
+            progress: {
+                trend: getProgressTrend(totalProductCount, lastWeekProductCount),
+                value: lastWeekProductCount
+            }
+        },
+        thisMonthData: {
+            name: ACTIVE_PRODUCTS,
+            totalValue: lastMonthProductCount,
+            progress: {
+                trend: getProgressTrend(totalProductCount, lastMonthProductCount),
+                value: lastMonthProductCount
+            }
         }
     }
 
