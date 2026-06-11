@@ -2,7 +2,6 @@
     import type { TCardProps } from "$lib/types/global/ui.types";
 	  import { SmileIcon } from "@hugeicons/core-free-icons";
     import { HugeiconsIcon } from '@hugeicons/svelte'
-	import { ArrowUpOutline } from "flowbite-svelte-icons";
 
     let { content }: { content: TCardProps } = $props<{ content: TCardProps }>()
 </script>
@@ -34,10 +33,19 @@
             <p class="desc">
               {#if content.item.progress.trend === "up"}
                   <span>
-                    <span class="inline-flex items-center rounded-sm bg-green-100 px-1.5 py-0 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
-                        <ArrowUpOutline class="me-1.5 h-3.5 w-3.5" style="margin-right: -5px; margin-bottom: 1px;" />
-                        {content.item.progress.value} 
-                    </span>
+                    {content.item.progress.value} 
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="green" 
+                      stroke-width="2" 
+                      stroke-linecap="round" 
+                      stroke-linejoin="round"
+                      class="arrow-positive"
+                    >
+                      <path d="M12 2L2 12H22L12 2Z" fill="green" />
+                    </svg>
                     from yesterday
                   </span>
               {:else if content.item.progress.trend === "down"}
@@ -82,6 +90,7 @@
   .card {
     position: relative;
   }
+  
   .card-body {
     display: flex;
     flex-direction: column;
@@ -117,7 +126,7 @@
     align-items: center;
     gap: 0.5rem;
     border-top: 0.5px solid rgba(128, 128, 128, 0.3);
-    padding: 0.5rem 0.95rem;
+    padding: 0.35rem 0.95rem;
     background-color: rgba(0, 0, 0, 0.007);
   }
 

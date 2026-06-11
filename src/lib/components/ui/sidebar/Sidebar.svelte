@@ -239,7 +239,7 @@
     }
 
     .menu-item.active {
-        background-color: #714df4;
+        background-color: #824C71;
         color: white;
     }
 
@@ -264,7 +264,7 @@
     }
 
     .download-card {
-        background-color: #714df4;      
+        background-color: #824C71;      
         border-radius: 8px;
         padding: 1.25rem;
         position: relative;

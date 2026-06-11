@@ -8,23 +8,36 @@
   let chartElement: HTMLDivElement = $state();
   let chartInstance: ApexCharts | null = null
 
+  const purpleAccent = "#824C71"
+  const purpleMuted = "#EDD4B2"
+  const darkAccent = "#4A2545"
+
   const options = {
-    colors: ["#1A56DB", "#FDBA8C"],
+    colors: [purpleAccent, purpleMuted, darkAccent],
+    
     series: [
       {
-        name: "Organic",
-        color: "#1A56DB",
+        name: "Sales",
+        color: purpleAccent,
         data: [
           { x: "Mon", y: 231 }, { x: "Tue", y: 122 }, { x: "Wed", y: 63 },
           { x: "Thu", y: 421 }, { x: "Fri", y: 122 }, { x: "Sat", y: 323 }, { x: "Sun", y: 111 }
         ]
       },
       {
-        name: "Social media",
-        color: "#FDBA8C",
+        name: "Order Completed",
+        color: purpleMuted,
         data: [
           { x: "Mon", y: 232 }, { x: "Tue", y: 113 }, { x: "Wed", y: 341 },
           { x: "Thu", y: 224 }, { x: "Fri", y: 522 }, { x: "Sat", y: 411 }, { x: "Sun", y: 243 }
+        ]
+      },
+      {
+        name: "Visitors",
+        color: darkAccent,
+        data: [
+          { x: "Mon", y: 23 }, { x: "Tue", y: 34 }, { x: "Wed", y: 44 },
+          { x: "Thu", y: 16 }, { x: "Fri", y: 6 }, { x: "Sat", y: 100 }, { x: "Sun", y: 35 } // '28' sudah diperbaiki ke 'Fri'
         ]
       }
     ],
@@ -36,9 +49,23 @@
       toolbar: { show: false },
       redrawOnParentResize: true, 
       redrawOnWindowResize: true,
+      animations: {
+        enabled: true,
+        easing: "linear",
+        speed: 100,
+        dynamicAnimation: {
+          enabled: true,
+          speed: 100
+        }
+      }
     },
     plotOptions: {
-      bar: { horizontal: false, columnWidth: "60%", borderRadiusApplication: "end", borderRadius: 8 }
+      bar: { 
+        horizontal: false, 
+        columnWidth: "65%", 
+        borderRadiusApplication: "end", 
+        borderRadius: 4 
+      }
     },
     grid: { show: false },
     dataLabels: { enabled: false },

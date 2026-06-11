@@ -6,9 +6,13 @@
     import { HugeiconsIcon } from "@hugeicons/svelte";
     import { Download01Icon } from "@hugeicons/core-free-icons";
 
+  const purpleAccent = "#824C71"
+  const purpleMuted = "#EDD4B2"
+  const darkAccent = "#4A2545"
+
   const options: ApexOptions = {
     series: [35.1, 23.5, 2.4],
-    colors: ["#1C64F2", "#16BDCA", "#FDBA8C"],
+    colors: [purpleAccent, purpleMuted, darkAccent],
     chart: {
       height: 265,
       width: "100%",
