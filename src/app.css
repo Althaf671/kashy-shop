@@ -1,6 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
-@plugin "daisyui";
+@source "../node_modules/@flowbite-svelte-plugins/chart/dist";
+@source "../node_modules/simple-datatables/dist";
+@source "../node_modules/@flowbite-svelte-plugins/datatable/dist";
+
+.datatable-pagination .datatable-active a,
+.datatable-pagination .datatable-active a:focus,
+.datatable-pagination .datatable-active a:hover,
+.datatable-pagination .datatable-active button,
+.datatable-pagination .datatable-active button:focus,
+.datatable-pagination .datatable-active button:hover {
+  background-color: #ffe4de;
+  cursor: default;
+}
+
+.datatable-wrapper .datatable-table tbody tr.selected {
+  background-color: #fff1ee !important;
+}
 
 body {
     font-family: 'Poppins', sans-serif;
@@ -11,7 +27,6 @@ body {
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
-    padding: 0;
 }
 
 ul, ol {

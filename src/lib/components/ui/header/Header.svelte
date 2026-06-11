@@ -144,8 +144,8 @@
         display: flex;
         align-items: center;
         letter-spacing: -0.1px;
-        width: 180px;
-        margin-bottom: -5px;
+        width: fit-content;
+        margin-bottom: -3px;
     }
 
     .time-text {

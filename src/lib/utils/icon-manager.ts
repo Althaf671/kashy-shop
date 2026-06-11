@@ -5,7 +5,7 @@ export type TIconName = "sales" | "categories" | "products" | "orders"
 
 export interface IIconInfo {
     icon: IconSvgElement
-    size: number
+    size: number 
 }
 
 const icons: Record<TIconName, IIconInfo> = {

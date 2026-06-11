@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Footer from '$lib/components/ui/footer/Footer.svelte';
 	import Header from '$lib/components/ui/header/Header.svelte';
 	import Sidebar from '$lib/components/ui/sidebar/Sidebar.svelte';
 	import { HEADER_KEY } from '$lib/stores/global/context';
@@ -30,6 +31,7 @@
     <div class="main-container">
         <Header />
         {@render children()}
+        <Footer />
     </div>
 </main>
 
