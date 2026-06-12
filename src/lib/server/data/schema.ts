@@ -143,6 +143,10 @@ export const users = pgTable('users', {
     name:               varchar('name',  { length: USERS_CONSTRAINT.nameLength }).notNull(),
     phone:              varchar('phone_number', { length: USERS_CONSTRAINT.phoneLength }).notNull().unique(),
     avatarPicture:      jsonb('avatar_picture').$type<TCloudinaryFile>().notNull(),
+    // bio
+    // bday
+    // quote
+    // banner
     updatedAt:          timestamp('updated_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow()
 }, (table) => ([
@@ -178,6 +182,9 @@ export const sessions = pgTable('session', {
     sessionToken: varchar('session_token').primaryKey(), 
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     expiredAt: timestamp('expired_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).notNull(), 
+    // device
+    // userAgent
+    // ipAddress
 });
 
 export const customers = pgTable('customers', {

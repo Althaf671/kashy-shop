@@ -40,11 +40,11 @@
         <Heading tag="h2" class="text-2xl font-[600]">Good {getTimeOfDay()}, Kashley</Heading>
 
         <ButtonGroup class="rounded-none shadow-none gap-3 justify-end">
-            <Button class="px-3 flex gap-1 rounded-md hover:bg-blue cursor-pointer text-[#636363]" >
+            <Button class="px-3 flex gap-1 rounded-lg hover:bg-blue cursor-pointer text-[#636363]" >
                 <CalendarMonthOutline class="me-2 h-4.5 w-4.5 text-[#7d7d7d]" />
                 Date Range
             </Button>
-            <Button class="px-3 flex gap-1.5 bg-[#824C71] text-[#f4f3ee] hover:bg-[#824C71] cursor-pointer rounded-md">
+            <Button class="px-3 flex gap-1.5 bg-[#824C71] text-[#f4f3ee] hover:bg-[#824C71] cursor-pointer rounded-lg">
                 <DownloadSolid class="me-2 h-4.5 w-4.5" />
                 Export CSV
             </Button>

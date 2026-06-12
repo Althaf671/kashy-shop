@@ -3,7 +3,7 @@
     import { 
         DashboardBrowsingIcon, Store04Icon, PackageIcon, 
         Setting07Icon, UserCircleIcon, Package02Icon,
-		Logout01Icon, HelpCircleIcon
+		Logout01Icon, HelpCircleIcon, UserMultiple02Icon
     } from '@hugeicons/core-free-icons';
     import { page } from '$app/state';
     import type { TSidebarProps } from "$lib/types/global/ui.types";
@@ -20,6 +20,7 @@
                 { name: "Dashboard", path: "/dashboard", icon: DashboardBrowsingIcon },
                 { name: "Shop", path: "/dashboard/shop-management", icon: Store04Icon },
                 { name: "Order", path: "/dashboard/order-management", icon: Package02Icon },
+                { name: "Customers", path: "/dashboard/notification", icon: UserMultiple02Icon },
             ],
             secondMenu: [
                 { name: "Help", path: "/help", icon: HelpCircleIcon },
@@ -84,7 +85,7 @@
         <nav class="sidebar-menu">
             {#each menuData.firstMenu as item (item.name)}
                 <a href={item.path} 
-                   class="menu-item" 
+                   class="menu-item rounded-lg" 
                    class:active={activeItemName === item.name} 
                    class:item-collapsed={isCollapsed}>
                     <span class="icon-wrapper" class:active={activeItemName === item.name}>
@@ -102,7 +103,7 @@
             <nav class="sidebar-menu" class:item-collapsed={isCollapsed}>
                 {#each menuData.secondMenu as item (item.name)}
                     <a href={item.path} 
-                       class="menu-item" 
+                       class="menu-item rounded-lg" 
                        class:active={activeItemName === item.name} 
                        class:item-collapsed={isCollapsed}>
                         <span class="icon-wrapper" class:active={activeItemName === item.name}>
@@ -129,7 +130,7 @@
     </div>
 
     {#if !isCollapsed && content.type === 'admin'}
-        <div class="download-card">
+        <div class="download-card rounded-lg">
             <button class="arrow-btn" aria-label="reminder-btn" onclick={changeReminder}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
@@ -221,7 +222,7 @@
         flex-direction: column;
         height: fit-content;
     }
-    .sidebar-menu { display: flex; flex-direction: column; gap: 0.7rem; flex: 1; }
+    .sidebar-menu { display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
     .sidebar-menu.item-collapsed { margin-top: 3rem; }
     .nav-title { margin-left: 8px; opacity: 60%; font-size: 12px; margin-bottom: 5px; }
     .nav-title.item-collapsed { display: none; }
@@ -234,7 +235,6 @@
         display: flex;
         align-items: center;
         padding: 0.45rem 1rem;
-        border-radius: 5px;
         cursor: pointer;
         width: 100%;
         transition: all 0.2s ease;
@@ -248,7 +248,7 @@
     .menu-item.active { background-color: #824C71; color: white; }
 
     .icon-wrapper { display: flex; align-items: center; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .icon-wrapper.active { rotate: -10deg; transform: scale(1.25); }
+    .icon-wrapper.active { rotate: -10deg; transform: scale(1.15); }
     .menu-item:not(.item-collapsed) .icon-wrapper { margin-right: 0.85rem; }
     .menu-text { flex: 1; white-space: nowrap; }
 
@@ -271,7 +271,6 @@
         font-size: 0.95rem;
         font-weight: 500;
         padding: 0.45rem 1rem; 
-        border-radius: 5px;
         transition: all 0.2s ease;
     }
 
@@ -286,7 +285,6 @@
 
     .download-card {
         background-color: #824C71;      
-        border-radius: 8px;
         padding: 1rem 1.25rem;
         position: relative;
         color: #1a1c23;
@@ -309,7 +307,14 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
+    }
+
+    .arrow-btn svg {
         transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .arrow-btn svg:hover {
+        transform: rotate(35deg);
     }
 
     .card-text { font-size: 0.95rem; font-weight: 700; width: 80%; color: white; margin-top: 1rem; }

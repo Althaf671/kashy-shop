@@ -54,7 +54,7 @@
 
         <div class="controls-row">
             
-            <div class="search-box rounded-md">
+            <div class="search-box rounded-lg">
                 <span class="search-icon">
                     <HugeiconsIcon icon={Search01Icon} size={18} color="#9ca3af" strokeWidth={2} />
                 </span>
@@ -65,7 +65,7 @@
                 />
             </div>
 
-            <button class="action-btn rounded-md" title="Notifications">
+            <button class="action-btn rounded-lg" title="Notifications">
                 <div class="icon-dot-wrapper">
                     <HugeiconsIcon icon={Notification01Icon} size={20} color="#1a1c23" strokeWidth={1.8} />
                     <span class="notification-dot"></span>

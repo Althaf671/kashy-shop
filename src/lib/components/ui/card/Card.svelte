@@ -7,7 +7,7 @@
 </script>
 
 {#if content.type === "metric"}
-    <div class="card w-96 bg-base-100 card-sm shadow-sm rounded-md">
+    <div class="card w-96 bg-base-100 card-sm shadow-sm rounded-lg">
         <div class="card-body">
             <!-- upper -->
             <div class="upper">
@@ -24,7 +24,7 @@
                   size={28}
                   color="#7d7d7d"
                   strokeWidth={1.35}
-                  style="position: absolute; right: 12px; cursor: pointer;"
+                  style="position: absolute; right: 12px;"
               />
           </div>
 
@@ -95,7 +95,7 @@
   .card-body {
     display: flex;
     flex-direction: column;
-    padding: 0.75rem;
+    padding: 0.75rem 0.95rem;
     height: 95px;
   }
 

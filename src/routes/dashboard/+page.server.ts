@@ -10,12 +10,11 @@ export async function load()
     //-- metric data and icon
     const metricData = await getDashboardAggregateDataAsync()
     console.log(metricData.error.description)
-    if (metricData.isFailure) {
+    if (metricData.isFailure) 
         return {
             metrics: [],
             error: metricData.error.description
         }
-    }
     
     const metricProps: TCardProps[] = metricData.value.map((data) => ({
         type: "metric",

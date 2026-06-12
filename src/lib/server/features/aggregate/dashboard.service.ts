@@ -1,6 +1,6 @@
 import { categories, db, products } from "$lib/server/data";
 import { getProgressTrend } from "$lib/server/utils/general/generator";
-import { metricTime } from "$lib/server/utils/general/time";
+import { metricTime, time } from "$lib/server/utils/general/time";
 import type { TDashboardData } from "$lib/types/features/dashboard.schema";
 import { Result } from "$lib/types/global";
 import { and, eq, sql } from "drizzle-orm";
@@ -65,6 +65,8 @@ export async function getDashboardAggregateDataAsync()
 
 //--- get category aggregate ------------
 async function getCategoryAggregateDataAsync(): Promise<Result<TDashboardData>> {
+    const now = new Date(time.now()).toISOString()
+
     // yesterday to today range
     const startOfToday = metricTime.rangeBetweenTodayAndYesterday().startOfToday
     const startOfYesterday = metricTime.rangeBetweenTodayAndYesterday().startOfYesterday
@@ -80,21 +82,31 @@ async function getCategoryAggregateDataAsync(): Promise<Result<TDashboardData>> 
     const [categoryStats] = await db
         .select({
             totalCount: sql<number>`COUNT (*)`,
+            todayCount: sql<number>`
+                SUM(CASE
+                    WHEN ${categories.createdAt} >= ${startOfToday}
+                    AND ${categories.createdAt} <= ${now}
+                    THEN 1
+                    ELSE 0
+                END)`,
             yesterdayCount: sql<number>`
                 SUM(CASE 
-                    WHEN ${categories.createdAt} >= ${startOfYesterday} AND ${categories.createdAt} <= ${startOfToday} 
+                    WHEN ${categories.createdAt} >= ${startOfYesterday} 
+                    AND ${categories.createdAt} < ${startOfToday} 
                     THEN 1 
                     ELSE 0 
                 END)`, 
             lastWeekCount: sql<number>`
                 SUM(CASE
-                    WHEN ${categories.createdAt} >= ${startOfLastWeek} AND ${categories.createdAt} <= ${startOfCurrentWeek}
+                    WHEN ${categories.createdAt} >= ${startOfLastWeek} 
+                    AND ${categories.createdAt} < ${startOfCurrentWeek}
                     THEN 1
                     ELSE 0
                 END)`,
             lastMonthCount: sql<number>`
                 SUM(CASE
-                    WHEN ${categories.createdAt} >= ${startOfLastMonth} AND ${categories.createdAt} <= ${startOfCurrentMonth}
+                    WHEN ${categories.createdAt} >= ${startOfLastMonth} 
+                    AND ${categories.createdAt} < ${startOfCurrentMonth}
                     THEN 1
                     ELSE 0
                 END)`
@@ -104,6 +116,7 @@ async function getCategoryAggregateDataAsync(): Promise<Result<TDashboardData>> 
 
     // conver SQL string into number
     const totalCategoryCount = Number(categoryStats.totalCount ?? 0)
+    const todayCategoryCount = Number(categoryStats.todayCount ?? 0)
     const yesterdayCategoryCount = Number(categoryStats.yesterdayCount ?? 0)
     const lastWeekCategoryCount = Number(categoryStats.lastWeekCount ?? 0)
     const lastMonthCategoryCount = Number(categoryStats.lastMonthCount ?? 0)
@@ -116,7 +129,7 @@ async function getCategoryAggregateDataAsync(): Promise<Result<TDashboardData>> 
             totalValue: totalCategoryCount,
             progress: {
                 trend: getProgressTrend(totalCategoryCount, yesterdayCategoryCount),
-                value: yesterdayCategoryCount
+                value: todayCategoryCount - yesterdayCategoryCount
             } 
         },
         thisWeekData: {
@@ -142,6 +155,8 @@ async function getCategoryAggregateDataAsync(): Promise<Result<TDashboardData>> 
 
 //--- get active product aggregate ------
 async function getActiveProductAggregateDataAsync(): Promise<Result<TDashboardData>> {
+    const now = new Date(time.now()).toISOString()
+
     // yesterday to today range
     const startOfToday = metricTime.rangeBetweenTodayAndYesterday().startOfToday
     const startOfYesterday = metricTime.rangeBetweenTodayAndYesterday().startOfYesterday
@@ -157,9 +172,17 @@ async function getActiveProductAggregateDataAsync(): Promise<Result<TDashboardDa
     const [productStats] = await db
         .select({
             totalCount: sql<number>`COUNT (*)`,
+            todayCount: sql<number>`
+                SUM(CASE
+                    WHEN ${products.createdAt} >= ${startOfToday}
+                    AND ${products.createdAt} <= ${now}
+                    THEN 1
+                    ELSE 0
+                END)`,
             yesterdayCount: sql<number>`
                 SUM(CASE 
-                    WHEN ${products.createdAt} >= ${startOfYesterday} AND ${products.createdAt} <= ${startOfToday} 
+                    WHEN ${products.createdAt} >= ${startOfYesterday} 
+                    AND ${products.createdAt} < ${startOfToday} 
                     THEN 1 
                     ELSE 0 
                 END)`, 
@@ -184,6 +207,7 @@ async function getActiveProductAggregateDataAsync(): Promise<Result<TDashboardDa
 
     // conver SQL string into number
     const totalProductCount = Number(productStats.totalCount ?? 0)
+    const todayProductCount = Number(productStats.todayCount ?? 0)
     const yesterdayProductCount = Number(productStats.yesterdayCount ?? 0)
     const lastWeekProductCount = Number(productStats.lastWeekCount ?? 0)
     const lastMonthProductCount = Number(productStats.lastMonthCount ?? 0)
@@ -196,7 +220,7 @@ async function getActiveProductAggregateDataAsync(): Promise<Result<TDashboardDa
             totalValue: totalProductCount,
             progress: {
                 trend: getProgressTrend(totalProductCount, yesterdayProductCount),
-                value: yesterdayProductCount
+                value: todayProductCount - yesterdayProductCount
             } 
         },
         thisWeekData: {

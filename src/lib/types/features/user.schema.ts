@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { TCloudinaryFile } from "../global";
 
 export interface ISession {
@@ -28,4 +29,31 @@ export type TSessionValidationResult =
 export type LoginLogoutResponse = { 
     message: string;
     url: string;
+}
+
+export const GetMyProfileDetailsScheme = z.object({
+    userId: z.uuid({ error: "Invalid user Id." })
+})
+
+export type TGetMyProfileDetailsRequest = z.infer<typeof GetMyProfileDetailsScheme>
+
+export type TGetMyProfileDetailsResponse = {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    avatarPicture: TCloudinaryFile;
+    createdAt: string;
+}
+
+export const GetMySessionListScheme = z.object({
+    userId: z.uuid({ error: "Invalid user Id." })
+})
+
+export type TGetMySessionListRequest = z.infer<typeof GetMyProfileDetailsScheme>
+
+export type TGetMySessionListResponse = {
+    device: string;
+    userAgent: string;
+    ipAddress: string;
 }

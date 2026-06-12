@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Card from "$lib/components/ui/card/Card.svelte";
+	import Chart from "$lib/components/ui/chart/Chart.svelte";
+	import Table from "$lib/components/ui/table/Table.svelte";
 	import { HEADER_KEY, type THeaderData } from "$lib/stores/global/context.js";
 	import { Button, ButtonGroup, Heading } from "flowbite-svelte";
 	import { CalendarMonthOutline, DownloadSolid } from "flowbite-svelte-icons";
@@ -8,7 +10,7 @@
     // header props
     const headerData: THeaderData = getContext(HEADER_KEY)
     $effect(() => {
-        headerData.pageName = "Order Management";
+        headerData.pageName = "Shop Management";
         headerData.description = "View all of your business summary.";
     });
     
@@ -54,6 +56,20 @@
        {/each}
     </div>
 
+    <!-- chart and quick action -->
+    <div class="chart-container">
+        <div class="bar-chart bg-base-100 card-sm shadow-sm rounded-sm">
+            <Chart />
+        </div>
+        <div class="donut-chart">
+            
+        </div>
+    </div>
+
+    <div class="table-container">
+        <Table />
+    </div>
+
 </main>
 
 <style>
@@ -69,5 +85,20 @@
     .metric-panel {
         display: flex;
         gap: 1rem;
+    }
+
+    .chart-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .bar-chart {
+        width: 70%;
+        min-width: 0;
+        position: relative; 
+        overflow: hidden;  
+        transition: width 3s ease-in-out;
     }
 </style>

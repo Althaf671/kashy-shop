@@ -92,7 +92,7 @@
   };
 </script>
 
-<Card class="p-4 md:p-6 h-[47.8vh] bg-base-100 card-sm shadow-sm rounded-md bg-white">
+<Card class="p-4 md:p-6 h-[47.8vh] bg-base-100 card-sm shadow-sm rounded-lg bg-white">
   <div class="flex w-full items-start justify-between">
     <div class="flex-col items-center">
       <div class="mb-1 flex items-center gap-2">
@@ -116,7 +116,7 @@
   <div class="grid grid-cols-1 items-center justify-between border-t border-gray-200 dark:border-gray-700">
     <div class="flex items-center justify-between pt-5">
       <Button class="inline-flex items-center bg-transparent py-0 text-center text-sm font-medium text-gray-500 hover:bg-transparent hover:text-gray-900 focus:ring-transparent dark:bg-transparent dark:text-gray-400 dark:hover:bg-transparent dark:hover:text-white dark:focus:ring-transparent">Last 7 days<ChevronDownOutline class="m-2.5 ms-1.5 w-2.5" /></Button>
-      <Dropdown simple class="w-40" offset={-6}>
+      <Dropdown simple class="w-40 pl-5" offset={-6}>
         <DropdownItem>Yesterday</DropdownItem>
         <DropdownItem>Today</DropdownItem>
         <DropdownItem>Last 7 days</DropdownItem>
