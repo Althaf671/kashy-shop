@@ -7,7 +7,7 @@
 </script>
 
 {#if content.type === "metric"}
-    <div class="card w-96 bg-base-100 card-sm shadow-sm">
+    <div class="card w-96 bg-base-100 card-sm shadow-sm rounded-md">
         <div class="card-body">
             <!-- upper -->
             <div class="upper">
@@ -22,7 +22,7 @@
               <HugeiconsIcon
                   icon={content.item.icon}
                   size={28}
-                  color="#6b7280"
+                  color="#7d7d7d"
                   strokeWidth={1.35}
                   style="position: absolute; right: 12px; cursor: pointer;"
               />
@@ -38,13 +38,13 @@
                       xmlns="http://www.w3.org/2000/svg" 
                       viewBox="0 0 24 24" 
                       fill="none" 
-                      stroke="green" 
+                      stroke="#5B8C5A" 
                       stroke-width="2" 
                       stroke-linecap="round" 
                       stroke-linejoin="round"
                       class="arrow-positive"
                     >
-                      <path d="M12 2L2 12H22L12 2Z" fill="green" />
+                      <path d="M12 2L2 12H22L12 2Z" fill="#5B8C5A" />
                     </svg>
                     from yesterday
                   </span>
@@ -89,8 +89,9 @@
 <style>
   .card {
     position: relative;
+    background-color: white;
   }
-  
+
   .card-body {
     display: flex;
     flex-direction: column;
@@ -112,7 +113,7 @@
   .upper .right .card-title {
     font-weight: 400;
     font-size: 0.89rem;
-    color: #6b7280;
+    color: #7d7d7d;
   }
 
   .upper .right span {
@@ -134,7 +135,7 @@
     display: flex;
     gap: 0.35rem;
     font-size: 0.75rem;
-    color: #6b7280;
+    color: #7d7d7d;
   }
 
   .arrow-negative {

@@ -1,13 +1,8 @@
 <script lang="ts">
     import { getContext, onDestroy } from 'svelte';
     import { HugeiconsIcon } from '@hugeicons/svelte';
-    import { 
-        Logout01Icon, 
-        Notification01Icon,
-        Search01Icon 
-    } from '@hugeicons/core-free-icons';
+    import { Notification01Icon, Search01Icon } from '@hugeicons/core-free-icons';
 	import { HEADER_KEY, type THeaderData } from '$lib/stores/global/context';
-	import { enhance } from '$app/forms';
 
     // search
     let searchQuery = $state("");
@@ -59,7 +54,7 @@
 
         <div class="controls-row">
             
-            <div class="search-box">
+            <div class="search-box rounded-md">
                 <span class="search-icon">
                     <HugeiconsIcon icon={Search01Icon} size={18} color="#9ca3af" strokeWidth={2} />
                 </span>
@@ -70,23 +65,12 @@
                 />
             </div>
 
-            <button class="action-btn" title="Notifications">
+            <button class="action-btn rounded-md" title="Notifications">
                 <div class="icon-dot-wrapper">
                     <HugeiconsIcon icon={Notification01Icon} size={20} color="#1a1c23" strokeWidth={1.8} />
                     <span class="notification-dot"></span>
                 </div>
             </button>
-
-            <form method="POST" action="/?/logout" use:enhance class="action-btn logout">
-                <button type="submit" aria-label="logout button">
-                    <HugeiconsIcon 
-                        icon={Logout01Icon} 
-                        size={20} 
-                        color="#1a1c23" 
-                        strokeWidth={1.8} 
-                    />
-                </button>
-            </form>
         </div>
     </div>
 </header>
@@ -103,6 +87,7 @@
         width: 100%;
         max-height: 200px;
         border-bottom: 0.5px solid rgba(128, 128, 128, 0.3);
+        background-color: #f4f3ee;
     }
 
     .welcome-section {
@@ -146,6 +131,7 @@
         letter-spacing: -0.1px;
         width: fit-content;
         margin-bottom: -3px;
+        gap: 10px;
     }
 
     .time-text {
@@ -159,23 +145,20 @@
 
     }
 
-    /* BARIS BAWAH: Controls Wrapper */
     .controls-row {
         display: flex;
         align-items: center;
         gap: 0.65rem;
     }
 
-    /* Search Box Kapsul Kotak */
     .search-box {
         background-color: #ffffff;
         border: 1px solid #e5e7eb;
-        border-radius: 5px;
         padding: 0.55rem 1rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        width: 240px;
+        width: 260px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
     }
 
@@ -198,13 +181,11 @@
         color: #9ca3af;
     }
 
-    /* Tombol Aksi Kotak Minimalis (Notif & Logout) */
     .action-btn {
         background-color: #ffffff;
         border: 1px solid #e5e7eb;
         width: 40px;
         height: 40px;
-        border-radius: 5px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -218,14 +199,7 @@
         background-color: #f9fafb;
         border-color: #d1d5db;
     }
-
-    /* Hover khusus untuk logout */
-    .action-btn.logout:hover {
-        background-color: #fee2e2;
-        border-color: #fca5a5;
-    }
     
-    /* Efek Dot Notifikasi merah di pojok kanan atas ikon lonceng */
     .icon-dot-wrapper {
         position: relative;
         display: flex;
@@ -239,12 +213,11 @@
         right: 0px;
         width: 7px;
         height: 7px;
-        background-color: #ef4444; /* Warna merah indikator */
+        background-color: #ef4444; 
         border-radius: 50%;
         border: 1px solid #ffffff;
     }
 
-    /* Responsive Layout */
     @media (max-width: 768px) {
         .header-container {
             flex-direction: column;

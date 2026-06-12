@@ -43,7 +43,7 @@
         display: flex;
         gap: 0.1rem;
         overflow-y: hidden;
-        background-color: rgb(237, 237, 237);
+        background-color: #f4f3ee;
     }
 
     .main-container {
@@ -51,7 +51,7 @@
         flex-direction:  column;
         width: 100%;
         height: 100vh;
-        background-color: rgb(255, 255, 255);
+        background-color: #f4f3ee;
         padding: 0 1.75rem 1.5rem 1.75rem;
         overflow-y: auto;
     }

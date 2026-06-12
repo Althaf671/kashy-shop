@@ -1,10 +1,8 @@
 <script lang="ts">
     import type { ApexOptions } from "apexcharts";
     import { Chart } from "@flowbite-svelte-plugins/chart";
-    import { Card, A, Button, Dropdown, DropdownItem, Popover, Tooltip } from "flowbite-svelte";
+    import { Card, A, Button, Dropdown, DropdownItem, Popover } from "flowbite-svelte";
     import { InfoCircleSolid, ChevronDownOutline, ChevronRightOutline } from "flowbite-svelte-icons";
-    import { HugeiconsIcon } from "@hugeicons/svelte";
-    import { Download01Icon } from "@hugeicons/core-free-icons";
 
   const purpleAccent = "#824C71"
   const purpleMuted = "#EDD4B2"
@@ -14,7 +12,7 @@
     series: [35.1, 23.5, 2.4],
     colors: [purpleAccent, purpleMuted, darkAccent],
     chart: {
-      height: 265,
+      height: 215,
       width: "100%",
       type: "donut",
         redrawOnParentResize: true, 
@@ -94,11 +92,11 @@
   };
 </script>
 
-<Card class="p-4 md:p-6 h-[52.8vh] bg-base-100 card-sm shadow-sm rounded-none">
+<Card class="p-4 md:p-6 h-[47.8vh] bg-base-100 card-sm shadow-sm rounded-md bg-white">
   <div class="flex w-full items-start justify-between">
     <div class="flex-col items-center">
       <div class="mb-1 flex items-center gap-2">
-        <h5 class="me-1 text-xl leading-none font-bold text-gray-900 dark:text-white">Website traffic</h5>
+        <h5 class="me-1 text-xl leading-none font-bold text-gray-900 dark:text-white" style="font-weight: 600;">Website traffic</h5>
         <InfoCircleSolid id="donut1" class="ms-1 h-3.5 w-3.5 cursor-pointer text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" />
         <Popover triggeredBy="#donut1" class="z-10 w-72 rounded-lg border border-gray-200 bg-white text-sm text-gray-500 shadow-xs dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400">
           <div class="space-y-2 p-3">
@@ -110,15 +108,6 @@
           </div>
         </Popover>
       </div>
-    </div>
-    <div class="flex items-center justify-end">
-        <HugeiconsIcon
-              icon={Download01Icon}
-              size={18}
-              color="#6b7280"
-              strokeWidth={1.5}
-          />
-      <Tooltip>Download CSV</Tooltip>
     </div>
   </div>
 
