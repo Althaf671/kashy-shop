@@ -16,6 +16,7 @@ import {
     ORDER_CONSTRAINT, 
     ORDERITEMS_CONSTRAINT, 
     PRODUCTS_CONSTRAINT, 
+    sessionConstraint, 
     USERS_CONSTRAINT, 
 } from "./schema.constraints";
 import { sql } from "drizzle-orm";
@@ -143,10 +144,10 @@ export const users = pgTable('users', {
     name:               varchar('name',  { length: USERS_CONSTRAINT.nameLength }).notNull(),
     phone:              varchar('phone_number', { length: USERS_CONSTRAINT.phoneLength }).notNull().unique(),
     avatarPicture:      jsonb('avatar_picture').$type<TCloudinaryFile>().notNull(),
-    // bio
-    // bday
-    // quote
-    // banner
+    biography:          varchar('biography', { length: USERS_CONSTRAINT.BIO_MAX_LENGTH }),
+    birthdayAt:         timestamp('birthday_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }),
+    quote:              varchar('quote', { length: USERS_CONSTRAINT.QUOTE_MAX_LENGTH }),
+    profileBanner:      jsonb('profile_banner').$type<TCloudinaryFile>(),
     updatedAt:          timestamp('updated_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow(),
     createdAt:          timestamp('created_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).defaultNow()
 }, (table) => ([
@@ -179,12 +180,13 @@ export const accounts = pgTable('account', {
 ]))
 
 export const sessions = pgTable('session', {
-    sessionToken: varchar('session_token').primaryKey(), 
-    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-    expiredAt: timestamp('expired_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).notNull(), 
-    // device
-    // userAgent
-    // ipAddress
+    sessionToken:   varchar('session_token').primaryKey(), 
+    userId:         uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    device:         varchar('device', { length: sessionConstraint.DEVICE_MAX_LENGTH }),
+    os:             varchar('os', { length: sessionConstraint.OS_MAX_LENGTH }),
+    browser:        varchar('browser', { length: sessionConstraint.BROWSER_MAX_LENGTH }),
+    ipAddress:      varchar('ip_address', { length: sessionConstraint.IP_ADDRESS_MAX_LENGTH }),
+    expiredAt:      timestamp('expired_at', { withTimezone: USERS_CONSTRAINT.isTimeZone }).notNull(), 
 });
 
 export const customers = pgTable('customers', {

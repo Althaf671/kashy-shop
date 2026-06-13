@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "$lib/server/config/cookie";
 import type { RequestEvent } from "@sveltejs/kit";
 import { clearAuthSession, createSessionAsync, generateSessionToken, invalidateSessionAsync, invalidateUserSessionsAsync } from "./session";
-import type { IGoogleIdTokenClaims, LoginLogoutResponse } from "$lib/types/features";
+import type { IGoogleIdTokenClaims, LoginLogoutResponse, TCreateSessionRequest, TGetDeviceInfoResponse } from "$lib/types/features";
 import { decodeIdToken, generateCodeVerifier, generateState, OAuth2Tokens } from "arctic";
 import { authMessages, google, googleOAuthScopes } from "$lib/server/config/google";
 import { removeGoogleCodeVerifierCookie, removeGoogleOAuthStateCookie, setGoogleCodeVerifierCookie, setGoogleOAuthStateCookie } from "../http/cookies/google-cookies";
@@ -12,11 +12,23 @@ import { authRoutes, protectedRoutes } from "$lib/constants/route";
 import { Result } from "$lib/types/global";
 import { statusCodes } from "$lib/constants";
 import { ENV } from "$lib/server/config/env";
+import { UAParser } from "ua-parser-js";
 
 const DOMAIN = "AuthService" as const
 
 function isEmailWhitelist(email: string): boolean {
     return email.toLowerCase() === ENV.WHITELIST_EMAIL.toLowerCase()
+}
+
+function getDeviceInfo(userAgent: string): TGetDeviceInfoResponse {
+    const parser = new UAParser(userAgent)
+    const result = parser.getResult()
+
+    return {
+        device: `${result.device.vendor || ''} ${result.device.model || ''}`.trim(),
+        os: `${result.os.name || ''} ${result.os.version}`.trim(),
+        browser: `${result.browser.name || ''}`.trim()
+    }
 }
 
 export function loginWithGoogleAuthorization(event: RequestEvent): Result<LoginLogoutResponse> {
@@ -37,10 +49,16 @@ export function loginWithGoogleAuthorization(event: RequestEvent): Result<LoginL
 export async function loginWithGoogleAuthorizationCallbackAsync(event: RequestEvent)
     : Promise<Result<LoginLogoutResponse>> 
 {
+    // oauth credentials
     const code = event.url.searchParams.get("code")
     const state = event.url.searchParams.get("state")
     const storedState = event.cookies.get(COOKIE_NAME.GOOGLE_OAUTH_STATE) ?? null
     const codeVerifier = event.cookies.get(COOKIE_NAME.GOOGLE_CODE_VERIFIER) ?? null
+
+    // user device info
+    const ipAddress = event.getClientAddress()
+    const userAgent = event.request.headers.get('user-agent') || ''
+    const deviceInfo = getDeviceInfo(userAgent)
 
     if (code === null || state === null || storedState === null || codeVerifier === null) {
         return Result.failure({
@@ -89,7 +107,16 @@ export async function loginWithGoogleAuthorizationCallbackAsync(event: RequestEv
 
     if (existingUserIdentity) {
         const sessionToken = generateSessionToken()
-        const session = await createSessionAsync(sessionToken, existingUserIdentity.id)
+
+        const sessionInfo: TCreateSessionRequest = {
+            token: sessionToken,
+            userId: existingUserIdentity.id,
+            ipAddress: ipAddress,
+            device: deviceInfo.device,
+            os: deviceInfo.os,
+            browser: deviceInfo.browser
+        }
+        const session = await createSessionAsync(sessionInfo)
 
         setSessionTokenCookie(event, sessionToken, session.expiresAt)
         removeGoogleOAuthStateCookie(event)

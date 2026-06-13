@@ -55,8 +55,17 @@ export const USERS_CONSTRAINT = {
     nameLength: 100,
     phoneLength: 30,
     avatarUrlLength: 2048,
-    isTimeZone: true
+    isTimeZone: true,
+    BIO_MAX_LENGTH: 1000,
+    QUOTE_MAX_LENGTH: 250,
 } as const;
+
+export const sessionConstraint = {
+    DEVICE_MAX_LENGTH: 500,
+    OS_MAX_LENGTH: 50,
+    BROWSER_MAX_LENGTH: 50,
+    IP_ADDRESS_MAX_LENGTH: 50
+}
 
 
 export const CUSTOMERS_CONSTRAINT = {

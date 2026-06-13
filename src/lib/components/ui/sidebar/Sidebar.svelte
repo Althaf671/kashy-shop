@@ -8,8 +8,9 @@
     import { page } from '$app/state';
     import type { TSidebarProps } from "$lib/types/global/ui.types";
 	import { enhance } from '$app/forms';
+	import type { TGetMyProfileDetailsResponse } from '$lib/types/features';
 
-    let { content }: { content: TSidebarProps } = $props();
+    let { content, data }: { content: TSidebarProps, data: TGetMyProfileDetailsResponse } = $props();
     let isCollapsed = $state(false);
 
     function toggleSidebar() { isCollapsed = !isCollapsed; }
@@ -68,7 +69,7 @@
         <button class="toggle-btn" onclick={toggleSidebar} aria-label="Toggle Sidebar">
             <div class="avatar">
                 <div class="avatar-image-wrapper">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHwPbuEQl_EOvbH_tdI9JBD0qhccz_fvPkzg&s" alt="Logo" />
+                    <img src={data.avatarPicture.fileUrl} alt="Logo" />
                 </div>
             </div>
         </button>

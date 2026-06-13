@@ -7,7 +7,7 @@
 	import { Home01FreeIcons } from '@hugeicons/core-free-icons';
 	import { setContext } from 'svelte';
 
-    let { children } = $props();
+    let { data, children } = $props();
 
     // header context
     let headerData = $state({ pageName: 'Admin Page', description: 'Manage your shop and order.' })
@@ -26,7 +26,7 @@
 </script>
 
 <main class="admin__panel">
-    <Sidebar content={sidebarItem} />
+    <Sidebar content={sidebarItem} data={data.myProfile} />
 
     <div class="main-container">
         <Header />

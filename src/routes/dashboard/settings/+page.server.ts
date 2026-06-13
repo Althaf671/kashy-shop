@@ -1,15 +1,18 @@
-import { messages, type TGetMyProfileDetailsResponse } from "$lib";
-import { GetMyProfileDetailsAsync } from "$lib/server/features/user/user.service";
+import { messages, type TGetMySessionListResponse } from "$lib";
+import { getMySessionListAsync } from "$lib/server/features/user/user.service";
 import type { RequestEvent } from "./$types";
 
 export async function load(event: RequestEvent)
-    : Promise<{ myProfile?: TGetMyProfileDetailsResponse, error?: string }> 
+    : Promise<{ 
+        mySessions?: TGetMySessionListResponse[],
+        error?: string 
+    }> 
 {
     const userId = event.locals.user?.id
     if (!userId) return { error: messages.NOT_FOUND("User Id") }
 
-    const myProfile = await GetMyProfileDetailsAsync({ userId: userId })
-    if (myProfile.isFailure) return { error: myProfile.error.description }
+    const mySessions = await getMySessionListAsync({ userId: userId })
+    if (mySessions.isFailure) return { error: mySessions.error.description }
 
-    return { myProfile: myProfile.value }
+    return { mySessions: mySessions.value }
 } 
