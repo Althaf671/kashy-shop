@@ -58,8 +58,8 @@
 
     <!-- chart and quick action -->
     <div class="chart-container">
-        <div class="bar-chart bg-base-100 card-sm shadow-sm rounded-sm">
-            <Chart />
+        <div class="bar-chart bg-base-100 card-sm shadow-none rounded-sm">
+            <Chart options={{ type: 'bar' }} />
         </div>
         <div class="donut-chart">
             

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import Footer from '$lib/components/ui/footer/Footer.svelte';
-	import Header from '$lib/components/ui/header/Header.svelte';
-	import Sidebar from '$lib/components/ui/sidebar/Sidebar.svelte';
-	import { HEADER_KEY } from '$lib/stores/global/context';
-	import type { TSidebarProps } from '$lib/types/global/ui.types';
-	import { Home01FreeIcons } from '@hugeicons/core-free-icons';
-	import { setContext } from 'svelte';
+    import Footer from '$lib/components/ui/footer/Footer.svelte';
+    import Header from '$lib/components/ui/header/Header.svelte';
+    import Sidebar from '$lib/components/ui/sidebar/Sidebar.svelte';
+    import { HEADER_KEY } from '$lib/stores/global/context';
+    import type { TSidebarProps } from '$lib/types/global/ui.types';
+    import { Home01FreeIcons } from '@hugeicons/core-free-icons';
+    import { setContext } from 'svelte';
 
     let { data, children } = $props();
 
@@ -25,34 +25,12 @@
     }
 </script>
 
-<main class="admin__panel">
+<main class="w-screen h-screen overflow-hidden flex gap-[0.1rem] bg-[#fbf8ef]">
     <Sidebar content={sidebarItem} data={data.myProfile} />
 
-    <div class="main-container">
+    <div class="flex flex-col w-full h-screen bg-[#fbfaf6] pt-0 px-[1.75rem] pb-[1.5rem] overflow-y-auto">
         <Header />
         {@render children()}
         <Footer />
     </div>
 </main>
-
-<style>
-    .admin__panel {
-        width: 100vw;
-        height: 100vh;
-        overflow-x: hidden;
-        display: flex;
-        gap: 0.1rem;
-        overflow-y: hidden;
-        background-color: #f4f3ee;
-    }
-
-    .main-container {
-        display: flex;
-        flex-direction:  column;
-        width: 100%;
-        height: 100vh;
-        background-color: #f4f3ee;
-        padding: 0 1.75rem 1.5rem 1.75rem;
-        overflow-y: auto;
-    }
-</style>

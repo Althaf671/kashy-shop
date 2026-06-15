@@ -9,7 +9,9 @@ declare global {
 			user: IUser | null;
 			session: ISession | null;
 		}
-		// interface PageData {}
+		interface PageData {
+      flash?: { type: 'success' | 'error'; message: string };
+    }
 		// interface PageState {}
 		// interface Platform {}
 	}

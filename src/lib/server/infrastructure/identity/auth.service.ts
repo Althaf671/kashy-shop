@@ -23,8 +23,10 @@ function isEmailWhitelist(email: string): boolean {
 function getDeviceInfo(userAgent: string): TGetDeviceInfoResponse {
     const parser = new UAParser(userAgent)
     const result = parser.getResult()
+    const deviceType = parser.getDevice().type
 
     return {
+        deviceType: deviceType || 'PC',
         device: `${result.device.vendor || ''} ${result.device.model || ''}`.trim(),
         os: `${result.os.name || ''} ${result.os.version}`.trim(),
         browser: `${result.browser.name || ''}`.trim()

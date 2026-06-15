@@ -6,6 +6,7 @@ export type TGetDeviceInfoResponse = {
     device: string;
     os: string;
     browser: string;
+    deviceType: string;
 }
 
 export interface ISession {

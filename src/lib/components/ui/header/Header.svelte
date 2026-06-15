@@ -2,7 +2,8 @@
     import { getContext, onDestroy } from 'svelte';
     import { HugeiconsIcon } from '@hugeicons/svelte';
     import { Notification01Icon, Search01Icon } from '@hugeicons/core-free-icons';
-	import { HEADER_KEY, type THeaderData } from '$lib/stores/global/context';
+    import { HEADER_KEY, type THeaderData } from '$lib/stores/global/context';
+    import { Input, Button, Heading } from 'flowbite-svelte';
 
     // search
     let searchQuery = $state("");
@@ -38,201 +39,45 @@
     });
 </script>
 
-<header class="header-container">
-    <div class="welcome-section">
-        <h1 class="main-title">{header.pageName}</h1>
-        <p class="sub-title">{header.description}</p>
+<header class="flex justify-between items-center pb-4 pt-2.75 bg-transparent w-full max-h-[200px] border-b border-b-[0.5px] border-[rgba(128,128,128,0.3)] bg-[#f4f3ee] max-md:flex-col max-md:items-start max-md:gap-[1.25rem]">
+    <div class="flex flex-col gap-[0.05rem] mt-[10px]">
+        <Heading tag="h1" class="text-[1.8rem] font-bold text-[#1a1c23] m-0 tracking-[-0.5px] leading-[1.1] pt-[1.5rem] !mb-0">
+            {header.pageName}
+        </Heading>
+        <p class="text-[0.9rem] text-[#6b7280] m-0 font-normal">{header.description}</p>
     </div>
 
-    <div class="right-section">
+    <div class="flex flex-col items-end gap-2 mt-[20px] max-md:w-full max-md:items-start">
 
-        <div class="datetime-display">
-            <span class="time-text">{currentTime}</span>
-            <span class="divider">|</span>
+        <div class="text-[0.88rem] text-[#6b7280] font-medium flex items-center tracking-[-0.1px] w-fit -mb-[3px] gap-[10px]">
+            <span class="font-bold text-[#1a1c23] tabular-nums">{currentTime}</span>
+            <span class="text-[#d1d5db]">|</span>
             <span class="date-text">{currentDate}</span>
         </div>
 
-        <div class="controls-row">
+        <div class="flex items-center gap-[0.65rem] max-md:w-full">
             
-            <div class="search-box rounded-lg">
-                <span class="search-icon">
+            <div class="search-box rounded-lg bg-white border border-[#e5e7eb] px-[1rem] py-[0.55rem] flex items-center gap-[0.5rem] w-[260px] shadow-[0_2px_6px_rgba(0,0,0,0.02)] max-md:flex-1">
+                <span class="flex items-center">
                     <HugeiconsIcon icon={Search01Icon} size={18} color="#9ca3af" strokeWidth={2} />
                 </span>
-                <input 
+                <Input 
                     type="text" 
                     placeholder="Search by keywords..." 
                     bind:value={searchQuery}
+                    class="!border-none !outline-none !bg-transparent text-[0.88rem] text-[#1a1c23] !w-full !p-0 focus:ring-0 placeholder:text-[#9ca3af]"
                 />
             </div>
 
-            <button class="action-btn rounded-lg" title="Notifications">
-                <div class="icon-dot-wrapper">
+            <Button 
+                class="action-btn !rounded-lg !bg-white !border !border-[#e5e7eb] !w-[40px] !h-[40px] !flex !items-center !justify-center !cursor-pointer transition-all duration-200 ease-in-out !shadow-[0_2px_6px_rgba(0,0,0,0.02)] !p-0 hover:!bg-[#f9fafb] hover:!border-[#d1d5db]" 
+                title="Notifications"
+            >
+                <div class="relative flex items-center justify-center">
                     <HugeiconsIcon icon={Notification01Icon} size={20} color="#1a1c23" strokeWidth={1.8} />
-                    <span class="notification-dot"></span>
+                    <span class="absolute -top-[1px] right-0 w-[7px] h-[7px] bg-[#ef4444] rounded-full border border-white"></span>
                 </div>
-            </button>
+            </Button>
         </div>
     </div>
 </header>
-
-<style>
-    .header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 0 1rem 0;
-        background-color: transparent;
-        font-family: 'Inter', sans-serif;
-        box-sizing: border-box;
-        width: 100%;
-        max-height: 200px;
-        border-bottom: 0.5px solid rgba(128, 128, 128, 0.3);
-        background-color: #f4f3ee;
-    }
-
-    .welcome-section {
-        display: flex;
-        flex-direction: column;
-        gap: 0.05rem;
-        margin-top: 10px;
-    }
-
-    .main-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #1a1c23;
-        margin: 0;
-        letter-spacing: -0.5px;
-        line-height: 1.1;
-        padding-top: 1.5rem;
-    }
-
-    .sub-title {
-        font-size: 0.9rem;
-        color: #6b7280;
-        margin: 0;
-        font-weight: 400;
-    }
-
-    .right-section {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 0.5rem;
-        margin-top: 20px;
-    }
-
-    .datetime-display {
-        font-size: 0.88rem;
-        color: #6b7280;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        letter-spacing: -0.1px;
-        width: fit-content;
-        margin-bottom: -3px;
-        gap: 10px;
-    }
-
-    .time-text {
-        font-weight: 700;
-        color: #1a1c23; /* Jam tebal hitam */
-        font-variant-numeric: tabular-nums;
-    }
-
-    .divider {
-        color: #d1d5db;
-
-    }
-
-    .controls-row {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-    }
-
-    .search-box {
-        background-color: #ffffff;
-        border: 1px solid #e5e7eb;
-        padding: 0.55rem 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        width: 260px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-    }
-
-    .search-icon {
-        display: flex;
-        align-items: center;
-    }
-
-    .search-box input {
-        border: none;
-        outline: none;
-        background: transparent;
-        font-size: 0.88rem;
-        color: #1a1c23;
-        width: 100%;
-        font-family: inherit;
-    }
-
-    .search-box input::placeholder {
-        color: #9ca3af;
-    }
-
-    .action-btn {
-        background-color: #ffffff;
-        border: 1px solid #e5e7eb;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-        padding: 0;
-    }
-
-    .action-btn:hover {
-        background-color: #f9fafb;
-        border-color: #d1d5db;
-    }
-    
-    .icon-dot-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .notification-dot {
-        position: absolute;
-        top: -1px;
-        right: 0px;
-        width: 7px;
-        height: 7px;
-        background-color: #ef4444; 
-        border-radius: 50%;
-        border: 1px solid #ffffff;
-    }
-
-    @media (max-width: 768px) {
-        .header-container {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1.25rem;
-        }
-        .right-section {
-            width: 100%;
-            align-items: flex-start;
-        }
-        .controls-row {
-            width: 100%;
-        }
-        .search-box {
-            flex: 1;
-        }
-    }
-</style>

@@ -5,16 +5,12 @@ import type { TDashboardData } from "$lib/types/features/dashboard.schema";
 import { Result } from "$lib/types/global";
 import { and, eq, sql } from "drizzle-orm";
 
-const DOMAIN = "DashboardService" as const
+const DOMAIN = "DashboardAggregateService" as const
 
 export async function getDashboardAggregateDataAsync()
     : Promise<Result<TDashboardData[]>> 
 {    
-    console.log("Initiating get dashboard aggregate data.")
-
     try {
-        console.log("Entering the try catch block.")
-
         // get sales aggregate 
 
         // get category aggregate
@@ -41,8 +37,8 @@ export async function getDashboardAggregateDataAsync()
 
         const completedOrderData: TDashboardData = {
             allTimeData: {
-                name: "Completed Orders",
-                totalValue: 4,
+                name: "Order Completed",
+                totalValue: 6,
                 progress: {
                     trend: getProgressTrend(4, 2),
                     value: 2

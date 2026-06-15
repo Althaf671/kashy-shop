@@ -17,5 +17,6 @@ export const authMessages = {
     BAD_REQUEST: "Invalid google authorization callback tokens.",
     AUTHORIZATION_TOKENS_GENERATED: "Google OAuth tokens generated.",
     AUTHORIZATION_GRANTED: "Authorization granted.",
-    UNAUTHENTICATED: "You are Unauthenticated."
+    UNAUTHENTICATED: "You are Unauthenticated.",
+    FORBIDDEN: "Method not allowed."
 } as const

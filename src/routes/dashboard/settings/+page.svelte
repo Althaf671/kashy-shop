@@ -2,6 +2,7 @@
     import { HEADER_KEY, type THeaderData } from '$lib/stores/global/context.js';
     import { ArrowUpRight03Icon, Edit02Icon, LaptopIcon, Profile02Icon, ShieldKeyIcon } from '@hugeicons/core-free-icons';
     import { HugeiconsIcon } from '@hugeicons/svelte';
+	import { Button, Card, Heading } from 'flowbite-svelte';
     import { getContext } from 'svelte';
 
     const headerData: THeaderData = getContext(HEADER_KEY);
@@ -38,7 +39,7 @@
             </div>
 
             <form action="/?/edit" method="POST" class="absolute bottom-5 right-4">
-                <button type="submit" class="text-sm bg-[#824C71] flex gap-1 text-[#f4f3ee] px-3 py-1.5 rounded-md cursor-pointer transition-colors">
+                <Button type="submit" class="text-sm bg-[#996087] flex gap-1 text-[#f4f3ee] px-3 py-1.5 shadow-sm rounded-md cursor-pointer transition-colors">
                     Edit
                     <HugeiconsIcon 
                         icon={Edit02Icon} 
@@ -46,7 +47,7 @@
                         color="#f4f3ee" 
                         strokeWidth={1.65} 
                     />  
-                </button>
+                </Button>
             </form>
         </div>
     {/if}
@@ -70,7 +71,7 @@
                 
                 <!-- Text Content -->
                 <div class="flex flex-col">
-                    <h3 class="text-xl font-bold text-gray-900">Personal Information</h3>
+                    <Heading tag="h4" class="text-xl font-[500] text-gray-900">Personal Information</Heading>
                     <p class="text-sm text-gray-500">A little about you</p>
                 </div>
             </div>
@@ -123,35 +124,35 @@
         <!-- Session List -->
         <div class="w-full md:w-[38%] bg-white rounded-lg shadow-sm flex flex-col min-h-[350px]">
             <!-- Header List -->
-            <div class="flex items-center justify-between px-4 py-3 bg-[#824C71] text-[#f4f3ee] rounded-t-lg">
+            <div class="flex items-center justify-between px-4 py-3 bg-[#996087] text-[#f4f3ee] rounded-t-lg">
                 <div class="flex items-center gap-1.5">
                     <HugeiconsIcon icon={ShieldKeyIcon} size={24} color="#f4f3ee" strokeWidth={1.65} />
-                    <h3 class="text-md">Active Sessions</h3>
+                    <Heading tag="h3" class="text-md text-[#f4f3ee] font-[500]">Active Sessions</Heading>
                 </div>
                 
                 <form action="/?/logoutAll" method="POST">
-                    <button type="submit" class="text-xs text-[#824C71] bg-white hover:bg-white/90 cursor-pointer px-2.5 py-1.25 rounded-md transition-colors">
+                    <Button type="submit" class="text-xs text-[#996087] bg-white hover:bg-white/90 cursor-pointer px-2.5 py-1.25 rounded-md transition-colors">
                         Logout All
-                    </button>
+                    </Button>
                 </form>
             </div>
 
             <!-- List -->
             <div class="flex flex-col p-3 gap-3.5 overflow-y-auto">
                 {#each mySessions as item (item)}
-                    <div class="session-card border cursor-default border-gray-100 rounded-md px-3 py-2.5 flex items-center gap-3 relative hover:bg-gray-50 transition-colors">
+                    <Card class="flex flex-row border cursor-default border-gray-100 shadow-xs rounded-md px-3 py-2.5 flex gap-3 relative hover:bg-gray-50 transition-colors">
                         <div class="flex h-12 w-12 items-center justify-center rounded-sm bg-gray-100">
                             <HugeiconsIcon icon={LaptopIcon} size={28} color="#7d7d7d" strokeWidth={1.65} />
                         </div>
                         <div class="flex flex-col">
-                            <h5 class="text-sm font-semibold text-gray-900">{item.device}</h5>
+                            <Heading tag="h4" class="text-sm font-[500] text-gray-900">{item.device}</Heading>
                             <p class="text-[0.75rem] text-gray-500">{item.os} - {item.browser}</p>
                             <p class="text-[0.75rem] text-gray-400">Expired in: {item.expiredAt}</p>
                         </div>
-                        <div class="absolute right-3 bottom-3 text-gray-400 cursor-pointer">
+                        <Button class="absolute border-none shadow-none right-3 bottom-1 text-gray-400 cursor-pointer">
                             <HugeiconsIcon icon={ArrowUpRight03Icon} size={18} />
-                        </div>
-                    </div>
+                        </Button>
+                    </Card>
                 {/each}
             </div>
         </div>

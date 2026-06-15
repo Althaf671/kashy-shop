@@ -122,7 +122,7 @@
                             <HugeiconsIcon icon={Logout01Icon} size={22} color="currentColor" strokeWidth={1.65} />
                         </span>
                         {#if !isCollapsed}
-                            <span class="menu-text">Sign Out</span>
+                            <span class="menu-text">Logout</span>
                         {/if}
                     </button>
                 </form>

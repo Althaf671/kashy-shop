@@ -1,38 +1,35 @@
 <script lang="ts">
     import type { TCardProps } from "$lib/types/global/ui.types";
-	  import { SmileIcon } from "@hugeicons/core-free-icons";
-    import { HugeiconsIcon } from '@hugeicons/svelte'
+    import { SmileIcon } from "@hugeicons/core-free-icons";
+    import { HugeiconsIcon } from '@hugeicons/svelte';
+    import { Card, Span } from 'flowbite-svelte';
 
     let { content }: { content: TCardProps } = $props<{ content: TCardProps }>()
 </script>
 
 {#if content.type === "metric"}
-    <div class="card w-96 bg-base-100 card-sm shadow-sm rounded-lg">
-        <div class="card-body">
-            <!-- upper -->
-            <div class="upper">
-              <!-- right -->
-              <div class="right">
-                  <h2 class="card-title">{content.item.name}</h2>
-                  <span>{content.item.value}</span>
+    <Card class="!p-0 w-96 shadow-xs rounded-lg relative bg-white !max-w-none">
+        <div class="card-body flex flex-col p-[0.75rem_0.95rem] h-[95px]">
+            <div class="upper flex gap-3 h-[50px]">
+              <div class="right flex flex-col">
+                  <h2 class="card-title font-normal text-[0.89rem] text-[#7d7d7d]">{content.item.name}</h2>
+                  <Span class="text-[1.8rem] font-medium" style="margin-top: 8px;">{content.item.value}</Span>
               </div>
-              </div>
+            </div>
 
-              <!-- Absolute menu -->
-              <HugeiconsIcon
-                  icon={content.item.icon}
-                  size={28}
-                  color="#7d7d7d"
-                  strokeWidth={1.35}
-                  style="position: absolute; right: 12px;"
-              />
-          </div>
+            <HugeiconsIcon
+                icon={content.item.icon}
+                size={28}
+                color="#7d7d7d"
+                strokeWidth={1.35}
+                class="absolute right-3"
+            />
+        </div>
 
-        <!-- lower -->
-        <div class="lower">
-            <p class="desc">
+        <div class="lower flex items-center gap-2 border-t border-[rgba(128,128,128,0.3)] border-t-[0.5px] px-[0.95rem] py-[0.35rem] bg-[rgba(0,0,0,0.007)]">
+            <p class="desc flex gap-[0.35rem] text-[0.75rem] text-[#7d7d7d]">
               {#if content.item.progress.trend === "up"}
-                  <span>
+                  <Span class="flex gap-[0.35rem] text-[0.75rem] text-[#7d7d7d]">
                     {content.item.progress.value} 
                     <svg 
                       xmlns="http://www.w3.org/2000/svg" 
@@ -42,14 +39,14 @@
                       stroke-width="2" 
                       stroke-linecap="round" 
                       stroke-linejoin="round"
-                      class="arrow-positive"
+                      class="arrow-positive w-3 pt-1 mr-1"
                     >
                       <path d="M12 2L2 12H22L12 2Z" fill="#5B8C5A" />
                     </svg>
                     from yesterday
-                  </span>
+                  </Span>
               {:else if content.item.progress.trend === "down"}
-                  <span>
+                  <Span class="flex gap-[0.35rem] text-[0.75rem] text-[#7d7d7d]">
                       {content.item.progress.value} 
                       <svg 
                         xmlns="http://www.w3.org/2000/svg" 
@@ -59,100 +56,29 @@
                         stroke-width="2" 
                         stroke-linecap="round" 
                         stroke-linejoin="round"
-                        class="arrow-negative"
+                        class="arrow-negative w-3 pb-1 mr-1"
                       >
                         <path d="M12 22L22 12H2L12 22Z" fill="red" />
                       </svg>
                       from yesterday
-                  </span>
+                  </Span>
               {:else}
-                  <span class="neutral">
+                  <Span class="neutral gap-[0.35rem] flex text-[0.75rem] text-[#7d7d7d]">
                     <HugeiconsIcon
                       icon={SmileIcon}
                       size={18}
-                      color="#000000"
+                      color="#7d7d7d"
                       strokeWidth={1.5}
-                      class="icon-wrapper"
+                      class="icon-wrapper mr-1"
                     />
                     nothings new
-                  </span>
+                  </Span>
               {/if}
             </p>
         </div>
-    </div>
+    </Card>
 {:else if content.type === "action"}
     <div class="action-card">Action Card</div>
 {:else if content.type === "notification"}
     <div class="notification-card">Notification Card</div>
 {/if}
-
-<style>
-  .card {
-    position: relative;
-    background-color: white;
-  }
-
-  .card-body {
-    display: flex;
-    flex-direction: column;
-    padding: 0.75rem 0.95rem;
-    height: 95px;
-  }
-
-  .upper {
-    display: flex;
-    gap: 0.75rem;
-    height: 50px;
-  }
-
-  .upper .right {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .upper .right .card-title {
-    font-weight: 400;
-    font-size: 0.89rem;
-    color: #7d7d7d;
-  }
-
-  .upper .right span {
-    font-size: 1.8rem;
-    font-weight: 500;
-    margin-top: 8px;
-  }
-
-  .lower {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    border-top: 0.5px solid rgba(128, 128, 128, 0.3);
-    padding: 0.35rem 0.95rem;
-    background-color: rgba(0, 0, 0, 0.007);
-  }
-
-  .lower .desc span {
-    display: flex;
-    gap: 0.35rem;
-    font-size: 0.75rem;
-    color: #7d7d7d;
-  }
-
-  .arrow-negative {
-    width: 12px;
-    padding-bottom: 4px;
-    margin-right: 4px;
-    color: red;
-  }
-
-  .arrow-positive {
-    width: 12px;
-    padding-top: 4px;
-    margin-right: 4px;
-    color: green;
-  }
-
-  .neutral {
-    display: flex;
-  }
-</style>
