@@ -22,7 +22,7 @@ export async function updateCategoryByIdAsync(data: TUpdateCategoryByIdRequest)
 
     try {
         // check is category exist and return prev thumbnail
-        const existingCategory = await isCategoryAvailableAsync(categoryId)
+        const existingCategory = await checkAndGetCategoryAsync(categoryId)
         if (existingCategory.isFailure) return Result.failure(existingCategory.error)
         
         // check is slug duplicated 
@@ -78,7 +78,7 @@ export async function updateCategoryByIdAsync(data: TUpdateCategoryByIdRequest)
 }
 
 //--- helper -------------------------------------
-async function isCategoryAvailableAsync(categoryId: string)
+async function checkAndGetCategoryAsync(categoryId: string)
     : Promise<Result<{ thumbnailPicture: TCloudinaryFile }>> 
 {
     const [categoryRecord] = await db

@@ -1,5 +1,8 @@
 import { z } from "zod";
 import type { TCloudinaryFile } from "../global";
+import { USERS_CONSTRAINT } from "$lib/server/data";
+import { ACCEPTED_IMAGE_TYPES, KASH } from "$lib/constants";
+import { size } from "$lib/server/utils/general/size";
 
 //--- user auth config -------------------
 export type TGetDeviceInfoResponse = {
@@ -65,7 +68,51 @@ export type TGetMyProfileDetailsResponse = {
     createdAt: string;
 }
 
-//--- get my session list ----------------
+//--- Patch My Profile -------------------
+export const PatchMyProfileScheme = z.object({
+    userId: z.uuid({ error: "Invalid user Id." }),
+    name: z
+        .string()
+        .max(USERS_CONSTRAINT.nameLength, `Maximum ${USERS_CONSTRAINT.nameLength} characters, ${KASH}.`)
+        .optional(),
+    email: z
+        .email({ error: "Invalid email format" })
+        .max(USERS_CONSTRAINT.emailLength, { error: `Maximum email length is ${USERS_CONSTRAINT.emailLength}.` })
+        .optional(),
+    phone: z.e164(`Please input a valid phone number. (eg: +628xxx)`)
+        .trim()
+        .optional(),
+    birthdayAt: z
+        .date()
+        .optional(),
+    biography: z
+        .string()
+        .max(USERS_CONSTRAINT.BIO_MAX_LENGTH, `Maximum ${USERS_CONSTRAINT.BIO_MAX_LENGTH} characters, ${KASH}.`)
+        .optional(),
+    profileBanner: z
+        .file()
+        .max(size.inMB(2), `Maximum file size is 2MB, ${KASH}.`)
+        .mime(ACCEPTED_IMAGE_TYPES, `File format is must between JPG, JPEG, or WEBP, ${KASH}.`)
+        .optional(),
+    quote: z
+        .string()
+        .max(USERS_CONSTRAINT.QUOTE_MAX_LENGTH, `Maximum ${USERS_CONSTRAINT.QUOTE_MAX_LENGTH} characters, ${KASH}.`)
+        .optional(),
+    avatarPicture: z
+        .file()
+        .max(size.inMB(2), `Maximum file size is 2MB, ${KASH}.`)
+        .mime(ACCEPTED_IMAGE_TYPES, `File format is must between JPG, JPEG, or WEBP, ${KASH}.`)
+        .optional(),
+})
+
+export type TPatchMyProfileRequest = z.infer<typeof PatchMyProfileScheme>
+
+export type TPatchMyProfileResponse = {
+    id: string;
+    name: string;
+}
+
+//--- get my session list -----------------
 export const GetMySessionListScheme = z.object({
     userId: z.uuid({ error: "Invalid user Id." })
 })

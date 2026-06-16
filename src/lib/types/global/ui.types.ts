@@ -13,6 +13,15 @@ import type {
     ApexYAxis 
 } from "apexcharts";
 
+//--- App colors -----------------
+export const APP_COLORS = {
+    PRIMARY: '',
+    LIGHT_PRIMARY: '#996087',
+    ACCENT_BACKGROUND: '#fbf8ef',
+    WHITE_BACKGROUND: '#ffffff',
+    DARK_BACKGROUND:  '#1E1E24'
+}
+
 //--- Header Props ---------------
 export interface IHeaderContext {
     set: (data: THeaderData) => { result: THeaderData }
@@ -87,3 +96,21 @@ export interface IChartOptions {
 export type TChartProps = 
     | { type: "bar", barItem?: IBarChartItem }
     | { type: "donut", labels?: string[], donutItem?: ApexNonAxisChartSeries }
+
+//--- Skeleton Props -------------
+export type TSkeletonType = 
+    | 'card' 
+    | 'bar-chart' 
+    | 'donut-chart'
+    | 'banner' 
+    | 'paragraf' 
+    | 'heading'
+
+//--- Drawer Props ---------------
+export type TDrawerType = 
+    | 'notification'
+    | 'create-category-form'
+    | 'create-product-form'
+    | 'patch-category-form'
+    | 'patch-product-form'
+    | 'patch-profile-form'

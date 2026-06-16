@@ -1,10 +1,24 @@
 <script lang="ts">
+	import { navigating } from '$app/state';
+	import Skeleton from '$lib/components/ui/skeleton/Skeleton.svelte';
     import { HEADER_KEY, type THeaderData } from '$lib/stores/global/context.js';
-    import { ArrowUpRight03Icon, Edit02Icon, LaptopIcon, Profile02Icon, ShieldKeyIcon } from '@hugeicons/core-free-icons';
+	import { openDrawer } from '$lib/stores/global/drawer.svelte.js';
+    import { 
+        ArrowUpRight03Icon, 
+        ComputerPhoneSyncIcon, 
+        Edit02Icon, 
+        LaptopIcon, 
+        Profile02Icon, 
+        ShieldKeyIcon, 
+		SmartPhone02Icon, 
+		Tablet01Icon
+
+    } from '@hugeicons/core-free-icons';
     import { HugeiconsIcon } from '@hugeicons/svelte';
 	import { Button, Card, Heading } from 'flowbite-svelte';
     import { getContext } from 'svelte';
 
+    // header props
     const headerData: THeaderData = getContext(HEADER_KEY);
     $effect(() => {
         headerData.pageName = "Settings Panel";
@@ -13,50 +27,74 @@
     
     const { data } = $props()
     const { mySessions, myProfile, error } = $derived(data)
+
+    // loading state
+    let isLoading = $derived(!!navigating.to)
+
+    function getDeviceIcon(item: { device: string, os: string }) {
+        const info = (item.device + " " + item.os).toLowerCase();
+        
+        if (info.includes("ipad") || info.includes("tablet")) return Tablet01Icon;
+        if (info.includes("mobile") || info.includes("ios") || info.includes("android")) return SmartPhone02Icon;
+        if (info.includes("pc") || info.includes("windows") || info.includes("mac") || info.includes("laptop")) return LaptopIcon;
+        
+        return ComputerPhoneSyncIcon; 
+    }
 </script>
 
-<main class="flex flex-col gap-6 py-6">
+<main class="flex flex-col gap-6 pt-6">
 
     <!-- Profile Banner -->
-    {#if myProfile === undefined} 
-        <p>{error}</p>
+    {#if isLoading} 
+        <Skeleton type='banner' />
+    {:else if myProfile === undefined}
+        <Skeleton type='banner' />
     {:else}
-        <div class="relative rounded-lg shadow-sm bg-white pb-3 overflow-hidden">
-            <!-- Banner image -->
-            <img src={myProfile.profileBanner?.fileUrl}
-                    class="w-full h-56 object-cover block" alt="Profile Banner" />
+        <Card class="relative rounded-lg shadow-xs bg-white pb-3 overflow-visible">
+            <img 
+                src="https://i.redd.it/liyue-harbor-and-wangshu-inn-backgrounds-from-the-new-event-v0-fidyq5valih61.jpg?width=1707&format=pjpg&auto=webp&s=c20b13494e9b8b0d93166333953fa7eb2257dbe4"
+                class="!w-full aspect-[4/1] object-cover block rounded-t-lg" 
+                alt="Profile Banner" 
+            />
             
-            <!-- Avatar -->
-            <div class="flex gap-3 ml-6 -mt-10">
-                <img src={myProfile.avatarPicture.fileUrl} 
-                        class="w-[105px] h-[105px] rounded-full p-1 bg-white shadow-sm" 
-                        style="margin: -2rem 0 0 2rem; object-fit: cover;"
+            <div class="relative px-6">
+                
+                <div class="flex items-end gap-4 -mt-12 sm:-mt-16" style="margin-top: -2.5rem;">
+                    
+                    <img src={myProfile.avatarPicture.fileUrl} 
+                        class="w-24 h-24 sm:w-[105px] sm:h-[105px] rounded-full border-4 border-white bg-white shadow-sm flex-shrink-0" 
+                        style="object-fit: cover;"
                         alt="{myProfile?.name} Profile Picture" />
-                <div class="pt-[0.5rem]">
-                    <p class="font-semibold text-[1.35rem]">{myProfile.name}</p>
-                    <p class="text-[0.8rem] text-gray-400 -mt-1">{myProfile.email}</p>
+                    
+                    <div class="pb-3">
+                        <p class="font-semibold text-[1.2rem] sm:text-[1.35rem]">{myProfile.name}</p>
+                        <p class="text-[0.75rem] sm:text-[0.8rem] text-gray-400 -mt-1">{myProfile.email}</p>
+                    </div>
                 </div>
             </div>
 
-            <form action="/?/edit" method="POST" class="absolute bottom-5 right-4">
-                <Button type="submit" class="text-sm bg-[#996087] flex gap-1 text-[#f4f3ee] px-3 py-1.5 shadow-sm rounded-md cursor-pointer transition-colors">
-                    Edit
-                    <HugeiconsIcon 
-                        icon={Edit02Icon} 
-                        size={16} 
-                        color="#f4f3ee" 
-                        strokeWidth={1.65} 
-                    />  
-                </Button>
-            </form>
-        </div>
+            <Button 
+                onclick={() => openDrawer('patch-profile-form')}
+                type="submit" 
+                class="text-sm absolute bottom-5 right-4 bg-[#996087] flex gap-1 text-[#f4f3ee] px-3 py-1.5 shadow-sm rounded-md cursor-pointer transition-colors"
+                title="Patch My Profile Form"
+            >
+                Edit
+                <HugeiconsIcon 
+                    icon={Edit02Icon} 
+                    size={16} 
+                    color="#f4f3ee" 
+                    strokeWidth={1.65} 
+                />  
+            </Button>
+        </Card>
     {/if}
     
     <!-- Information Container -->
     <div class="flex flex-col md:flex-row gap-6 w-full">
         
         <!-- Personal Info -->
-        <div class="w-full md:w-[60%] bg-white rounded-lg shadow-sm p-6 min-h-[350px]">
+        <Card class="w-full md:w-[60%] bg-white rounded-lg shadow-xs p-6 min-h-[350px]">
             <!-- Header -->
             <div class="flex items-center gap-4 mb-6 pb-3">
                 <!-- Icon Container -->
@@ -119,10 +157,10 @@
                 </div>
 
             </div>
-        </div>
+        </Card>
 
         <!-- Session List -->
-        <div class="w-full md:w-[38%] bg-white rounded-lg shadow-sm flex flex-col min-h-[350px]">
+        <Card class="w-full md:w-[38%] bg-white rounded-lg shadow-xs flex flex-col min-h-[350px]">
             <!-- Header List -->
             <div class="flex items-center justify-between px-4 py-3 bg-[#996087] text-[#f4f3ee] rounded-t-lg">
                 <div class="flex items-center gap-1.5">
@@ -142,19 +180,19 @@
                 {#each mySessions as item (item)}
                     <Card class="flex flex-row border cursor-default border-gray-100 shadow-xs rounded-md px-3 py-2.5 flex gap-3 relative hover:bg-gray-50 transition-colors">
                         <div class="flex h-12 w-12 items-center justify-center rounded-sm bg-gray-100">
-                            <HugeiconsIcon icon={LaptopIcon} size={28} color="#7d7d7d" strokeWidth={1.65} />
+                            <HugeiconsIcon icon={getDeviceIcon(item)} size={28} color="#7d7d7d" strokeWidth={1.65} />
                         </div>
                         <div class="flex flex-col">
                             <Heading tag="h4" class="text-sm font-[500] text-gray-900">{item.device}</Heading>
                             <p class="text-[0.75rem] text-gray-500">{item.os} - {item.browser}</p>
                             <p class="text-[0.75rem] text-gray-400">Expired in: {item.expiredAt}</p>
                         </div>
-                        <Button class="absolute border-none shadow-none right-3 bottom-1 text-gray-400 cursor-pointer">
+                        <Button class="absolute border-none shadow-none -right-1 bottom-1 text-gray-400 cursor-pointer">
                             <HugeiconsIcon icon={ArrowUpRight03Icon} size={18} />
                         </Button>
                     </Card>
                 {/each}
             </div>
-        </div>
+        </Card>
     </div>
 </main>

@@ -1,5 +1,5 @@
 //--- File validation ---------------------------
-export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/webp"] as string[];
+export const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"] as string[];
 export type TAcceptedImages = typeof ACCEPTED_IMAGE_TYPES[number]
 
 //--- File converter ----------------------------

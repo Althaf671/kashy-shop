@@ -6,7 +6,7 @@
   }
 </script>
 
-<Footer class="rounded-lg shadow-md">
+<Footer class="rounded-lg shadow-md" style="margin-top: 1rem;">
   <FooterCopyright href="/" by="Kashy Handcraft" year={getCurrentYear()} />
   <FooterLinkGroup class="text-body mt-5 pt-2 flex gap-3 flex-wrap items-center text-sm sm:mt-0">
     <FooterLink href="/">About</FooterLink>

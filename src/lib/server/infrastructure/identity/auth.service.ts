@@ -25,10 +25,16 @@ function getDeviceInfo(userAgent: string): TGetDeviceInfoResponse {
     const result = parser.getResult()
     const deviceType = parser.getDevice().type
 
+    let deviceName = `${result.device.vendor || ''} ${result.device.model || ''}`.trim();
+    
+    if (deviceName.length <= 2) {
+        deviceName = 'Android Device'
+    }
+
     return {
         deviceType: deviceType || 'PC',
-        device: `${result.device.vendor || ''} ${result.device.model || ''}`.trim(),
-        os: `${result.os.name || ''} ${result.os.version}`.trim(),
+        device: deviceName,
+        os: `${result.os.name || ''} ${result.os.version || ''}`.trim(),
         browser: `${result.browser.name || ''}`.trim()
     }
 }

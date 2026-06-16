@@ -1,19 +1,34 @@
 <script lang="ts">
     import { HugeiconsIcon } from '@hugeicons/svelte';
     import { 
-        DashboardBrowsingIcon, Store04Icon, PackageIcon, 
-        Setting07Icon, UserCircleIcon, Package02Icon,
-		Logout01Icon, HelpCircleIcon, UserMultiple02Icon
+        DashboardBrowsingIcon, 
+        Store04Icon, 
+        PackageIcon, 
+        Setting07Icon,
+        UserCircleIcon, 
+        Package02Icon,
+		Logout01Icon, 
+        HelpCircleIcon, 
+        UserMultiple02Icon,
+		More01Icon,
+		Cancel01Icon
     } from '@hugeicons/core-free-icons';
     import { page } from '$app/state';
     import type { TSidebarProps } from "$lib/types/global/ui.types";
 	import { enhance } from '$app/forms';
 	import type { TGetMyProfileDetailsResponse } from '$lib/types/features';
 
-    let { content, data }: { content: TSidebarProps, data: TGetMyProfileDetailsResponse } = $props();
+    let { content, data }: { content: TSidebarProps, data: TGetMyProfileDetailsResponse | undefined } = $props();
     let isCollapsed = $state(false);
 
-    function toggleSidebar() { isCollapsed = !isCollapsed; }
+    let isMobileOpen = $state(false);
+    function toggleMobile() { isMobileOpen = !isMobileOpen; }
+
+    function toggleSidebar() {
+        if (window.innerWidth > 768) {
+            isCollapsed = !isCollapsed;
+        }
+    }
 
     const menuConfig = {
         admin: {
@@ -21,10 +36,10 @@
                 { name: "Dashboard", path: "/dashboard", icon: DashboardBrowsingIcon },
                 { name: "Shop", path: "/dashboard/shop-management", icon: Store04Icon },
                 { name: "Order", path: "/dashboard/order-management", icon: Package02Icon },
-                { name: "Customers", path: "/dashboard/notification", icon: UserMultiple02Icon },
+                { name: "Customers", path: "/dashboard/customer-management", icon: UserMultiple02Icon },
             ],
             secondMenu: [
-                { name: "Help", path: "/help", icon: HelpCircleIcon },
+                { name: "Help", path: "/dashboard/help", icon: HelpCircleIcon },
                 { name: "Settings", path: "/dashboard/settings", icon: Setting07Icon },
             ],
         },
@@ -64,12 +79,22 @@
     }
 </script>
 
-<aside class="sidebar-container" class:collapsed={isCollapsed}>
+<button class="mobile-toggle-btn md:hidden" onclick={toggleMobile} aria-label="Toggle Sidebar">
+    {#if isMobileOpen}
+        <HugeiconsIcon icon={Cancel01Icon} size={22} color="currentColor" strokeWidth={1.65} /> {:else}
+        <HugeiconsIcon icon={More01Icon} size={22} color="currentColor" strokeWidth={1.65} />
+    {/if}
+</button>
+
+<aside class="sidebar-container" 
+       class:collapsed={isCollapsed} 
+       class:mobile-open={isMobileOpen}>
+
     <div class="sidebar-header" class:header-collapsed={isCollapsed}>
         <button class="toggle-btn" onclick={toggleSidebar} aria-label="Toggle Sidebar">
             <div class="avatar">
                 <div class="avatar-image-wrapper">
-                    <img src={data.avatarPicture.fileUrl} alt="Logo" />
+                    <img src={data?.avatarPicture.fileUrl} alt="Logo" />
                 </div>
             </div>
         </button>
@@ -323,4 +348,35 @@
     .line { height: 3px; background-color: rgba(14, 14, 14, 0.538); border-radius: 2px; }
     .line.decor-1 { width: 90%; }
     .line.decor-2 { width: 100%; }
+
+    @media (max-width: 768px) {
+        .sidebar-container {
+            position: fixed;
+            left: -300px; 
+            top: 0;
+            z-index: 100;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-container.mobile-open {
+            left: 0;
+        }
+
+        .sidebar-container.collapsed {
+            width: 300px !important;
+        }
+
+        .mobile-toggle-btn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 101;
+            background-color: #824C71;
+            color: white;
+            padding: 0.5rem 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+        }
+    }
 </style>

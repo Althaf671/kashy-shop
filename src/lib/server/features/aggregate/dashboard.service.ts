@@ -27,7 +27,7 @@ export async function getDashboardAggregateDataAsync()
         const salesData: TDashboardData = {
             allTimeData: {
                 name: "Sales",
-                totalValue: 1000,
+                totalValue: 23573400,
                 progress: {
                     trend: getProgressTrend(1000, 300),
                     value: 300
@@ -37,10 +37,10 @@ export async function getDashboardAggregateDataAsync()
 
         const completedOrderData: TDashboardData = {
             allTimeData: {
-                name: "Order Completed",
+                name: "Delivered",
                 totalValue: 6,
                 progress: {
-                    trend: getProgressTrend(4, 2),
+                    trend: getProgressTrend(2, 4),
                     value: 2
                 }
             },
@@ -124,7 +124,7 @@ async function getCategoryAggregateDataAsync(): Promise<Result<TDashboardData>> 
             name: CATEGORIES,
             totalValue: totalCategoryCount,
             progress: {
-                trend: getProgressTrend(totalCategoryCount, yesterdayCategoryCount),
+                trend: getProgressTrend(todayCategoryCount, yesterdayCategoryCount),
                 value: todayCategoryCount - yesterdayCategoryCount
             } 
         },
@@ -215,7 +215,7 @@ async function getActiveProductAggregateDataAsync(): Promise<Result<TDashboardDa
             name: ACTIVE_PRODUCTS,
             totalValue: totalProductCount,
             progress: {
-                trend: getProgressTrend(totalProductCount, yesterdayProductCount),
+                trend: getProgressTrend(todayProductCount, yesterdayProductCount),
                 value: todayProductCount - yesterdayProductCount
             } 
         },

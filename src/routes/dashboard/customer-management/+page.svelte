@@ -4,7 +4,6 @@
 	import Dropdown from "$lib/components/ui/dropdown/Dropdown.svelte";
 	import Table from "$lib/components/ui/table/Table.svelte";
 	import { HEADER_KEY, type THeaderData } from "$lib/stores/global/context.js";
-	import { APP_COLORS } from "$lib/types/global/ui.types.js";
 	import { Button, Heading } from "flowbite-svelte";
 	import { CalendarMonthOutline, ChevronDownOutline, DownloadSolid } from "flowbite-svelte-icons";
 	import { getContext } from "svelte";
@@ -39,7 +38,7 @@
 
 </script>
 
-<main class="shop__management bg-[{APP_COLORS.ACCENT_BACKGROUND}]">
+<main class="shop__management">
 
     <!-- filter and export -->
     <div class="flex flex-col gap-4 md:flex-row md:justify-between md:items-center w-full">
@@ -104,6 +103,7 @@
         padding-top: 1.5rem;
         gap: 1rem;
         height: auto;
+        background-color: #f4f3ee;
     }
 
     .metric-panel {
