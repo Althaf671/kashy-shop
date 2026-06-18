@@ -26,7 +26,7 @@
 
     <div 
         transition:fly={{ x: 350, duration: 300, easing: quintOut }}
-        class="fixed top-0 right-0 z-50 h-full w-[420px] bg-white shadow-2xl flex flex-col"
+        class="fixed top-0 right-0 z-50 h-full w-[385px] bg-white shadow-2xl flex flex-col"
     >
         <div class="px-6 py-4.5 border-b border-gray-100 shrink-0">
             <div class="flex justify-between items-start mb-2">

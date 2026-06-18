@@ -37,7 +37,7 @@
         if (!isFocused || filteredPages.length === 0) return;
 
         if (e.key === "ArrowDown") {
-            e.preventDefault(); // Mencegah kursor input bergerak
+            e.preventDefault();
             selectedIndex = Math.min(selectedIndex + 1, filteredPages.length - 1);
         } else if (e.key === "ArrowUp") {
             e.preventDefault();
