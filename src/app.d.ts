@@ -1,5 +1,6 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 import type { ISession, IUser } from "$lib/types/features";
+import type { TToastType } from "$lib/types/global/ui.types";
 
 // for information about these interfaces
 declare global {
@@ -10,7 +11,8 @@ declare global {
 			session: ISession | null;
 		}
 		interface PageData {
-      flash?: { type: 'success' | 'error'; message: string };
+      flashToast?: { type: TToastType; message: string };
+      reactiveToast?: { type: TToastType; message: string };
     }
 		// interface PageState {}
 		// interface Platform {}

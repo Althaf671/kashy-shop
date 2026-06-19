@@ -26,7 +26,7 @@
     });
     
     const { data } = $props()
-    const { mySessions, myProfile, error } = $derived(data)
+    const { mySessions, myProfile } = $derived(data)
 
     // loading state
     let isLoading = $derived(!!navigating.to)

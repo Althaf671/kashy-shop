@@ -73,10 +73,12 @@ export const PatchMyProfileScheme = z.object({
     userId: z.uuid({ error: "Invalid user Id." }),
     name: z
         .string()
+        .min(3, `Minimum 3 charaters.`)
         .max(USERS_CONSTRAINT.nameLength, `Maximum ${USERS_CONSTRAINT.nameLength} characters, ${KASH}.`)
         .optional(),
     email: z
         .email({ error: "Invalid email format" })
+        .min(10, { error: "Minimum email length is 10 characters." })
         .max(USERS_CONSTRAINT.emailLength, { error: `Maximum email length is ${USERS_CONSTRAINT.emailLength}.` })
         .optional(),
     phone: z.e164(`Please input a valid phone number. (eg: +628xxx)`)
@@ -87,6 +89,7 @@ export const PatchMyProfileScheme = z.object({
         .optional(),
     biography: z
         .string()
+        .min(5, `Minimum 5 charaters.`)
         .max(USERS_CONSTRAINT.BIO_MAX_LENGTH, `Maximum ${USERS_CONSTRAINT.BIO_MAX_LENGTH} characters, ${KASH}.`)
         .optional(),
     profileBanner: z
@@ -96,6 +99,7 @@ export const PatchMyProfileScheme = z.object({
         .optional(),
     quote: z
         .string()
+        .min(5, `Minimum 5 charaters.`)
         .max(USERS_CONSTRAINT.QUOTE_MAX_LENGTH, `Maximum ${USERS_CONSTRAINT.QUOTE_MAX_LENGTH} characters, ${KASH}.`)
         .optional(),
     avatarPicture: z

@@ -114,3 +114,24 @@ export type TDrawerType =
     | 'patch-category-form'
     | 'patch-product-form'
     | 'patch-profile-form'
+
+//--- Toast Props ----------------
+export const TOAST_TYPE = {
+    SUCCESS: 'success',
+    ERROR: 'error',
+    INFORMATION: 'information'
+} as const
+
+export type TToastType = typeof TOAST_TYPE[keyof typeof TOAST_TYPE]
+
+//--- Form Errors ----------------
+export type TFormErrors = {
+    name?: string;
+    email?: string;
+    phone?: string;
+    birthdayAt?: string;
+    biography?: string;
+    quote?: string;
+    profileBanner?: string;
+    avatarPicture?: string;
+};

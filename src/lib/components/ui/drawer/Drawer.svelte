@@ -1,18 +1,27 @@
 <script lang="ts">
     import { fade, fly } from 'svelte/transition';
     import { quintOut } from 'svelte/easing';
-    import type { TDrawerType } from '$lib/types/global/ui.types';
-    import { CloseCircleOutline, EnvelopeSolid, UserCircleOutline } from 'flowbite-svelte-icons';
+    import type { TDrawerType, TFormErrors } from '$lib/types/global/ui.types';
+    import { CloseCircleOutline, EnvelopeSolid, PhoneSolid, UserCircleOutline } from 'flowbite-svelte-icons';
+	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 
     // State props
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let { open = $bindable(), type }: { open: any, type: TDrawerType } = $props();
 
     // File states
     let avatarFiles = $state<FileList | null>(null);
     let bannerFiles = $state<FileList | null>(null);
 
-    const getFileNames = (files: FileList | null) => 
-        files ? Array.from(files).map(f => f.name).join(", ") : "No files selected";
+    // error catcher
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let formErrors = $derived((page.form as any)?.errors as TFormErrors)
+
+    // const getFileNames = (files: FileList | null) => 
+    //     files ? Array.from(files).map(f => f.name).join(", ") : "No files selected";
+
+    // [TODO]: make error berurutan, error human readable.
 </script>
 
 {#if open}
@@ -45,7 +54,18 @@
                 <div class="text-gray-500">No new notifications</div>
             {:else if type === 'patch-profile-form'}
                 
-                <form method="POST" action="?/patchProfile" enctype="multipart/form-data" class="space-y-6">
+                <form 
+                    method="POST" 
+                    action="?/patchProfile" 
+                    enctype="multipart/form-data" 
+                    class="space-y-6"
+                    use:enhance={() => { 
+                        return async ({ result, update }) => { 
+                            await update() 
+                            if (result.type === 'success') open = false
+                        }
+                    }}
+                >
                     <div class="space-y-5 pb-[2rem] flex flex-col gap-3.5">
                         <div>
                             <label for="name" class="block text-sm font-[500] text-gray-700 mb-1.5" style="margin-bottom: 3px;">Fullname</label>
@@ -53,10 +73,19 @@
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                     <UserCircleOutline class="h-5 w-5 text-gray-400" />
                                 </div>
-                                <input id="name" name="name" type="text" placeholder="Kashley Vanrogoue" 
-                                    class="w-full text-sm pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#996087] focus:border-[#996087] outline-none transition-all"
+                                <input 
+                                    id="name" 
+                                    name="name" 
+                                    type="text" 
+                                    placeholder="Kashley Vanrogoue" 
+                                    class="w-full text-sm pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 
+                                           focus:ring-[#996087] focus:border-[#996087] outline-none transition-all
+                                           {formErrors?.name ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-[#996087] focus:border-[#996087]'}"
                                 />
                             </div>
+                            {#if formErrors?.name}
+                                <p class="text-xs text-red-600 font-[400]" style="margin-top: 5px;">{formErrors.name}</p>
+                            {/if}
                         </div>
 
                         <div>
@@ -65,22 +94,48 @@
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                     <EnvelopeSolid class="h-5 w-5 text-gray-400" />
                                 </div>
-                                <input id="email" name="email" type="email" placeholder="kashgallery@gmail.com" 
-                                    class="w-full text-sm pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#996087] focus:border-[#996087] outline-none transition-all"
+                                <input 
+                                    id="email" 
+                                    name="email" 
+                                    type="email" 
+                                    placeholder="kashgallery@gmail.com" 
+                                    class="w-full text-sm pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 
+                                           focus:ring-[#996087] focus:border-[#996087] outline-none transition-all
+                                           {formErrors?.email ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-[#996087] focus:border-[#996087]'}"
                                 />
                             </div>
+                            {#if formErrors?.email}
+                                <p class="text-xs text-red-600 font-[400]" style="margin-top: 5px;">{formErrors.email}</p>
+                            {/if}
                         </div>
 
                         <div>
-                            <label for="phone" class="block text-sm font-[500] text-gray-700 mb-1.5" style="margin-bottom: 3px;">Phone Number</label>
-                            <input id="phone" name="phone" type="text" placeholder="+628123456789" 
-                                class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#996087] focus:border-[#996087] outline-none transition-all"
-                            />
+                            <label for="phone" class="block text-sm font-[500] text-gray-700 mb-1.5" style="margin-bottom: 3px;">Phone</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <PhoneSolid class="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input 
+                                    id="phone" 
+                                    name="phone" 
+                                    type="text" 
+                                    placeholder="+628123456789" 
+                                    class="w-full text-sm pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 
+                                           focus:ring-[#996087] focus:border-[#996087] outline-none transition-all
+                                           {formErrors?.phone ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-[#996087] focus:border-[#996087]'}"
+                                />
+                            </div>
+                            {#if formErrors?.phone}
+                                <p class="text-xs text-red-600 font-[400]" style="margin-top: 5px;">{formErrors.phone}</p>
+                            {/if}
                         </div>
 
                         <div>
                             <label for="birthdayAt" class="block text-sm font-[500] text-gray-700 mb-1.5" style="margin-bottom: 3px;">Birthday</label>
-                            <input id="birthdayAt" name="birthdayAt" type="date" 
+                            <input 
+                                id="birthdayAt" 
+                                name="birthdayAt" 
+                                type="date" 
                                 class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#996087] focus:border-[#996087] outline-none transition-all"
                             />
                         </div>
@@ -94,13 +149,16 @@
 
                         <div>
                             <label for="quote" class="block text-sm font-[500] text-gray-700 mb-1.5" style="margin-bottom: 3px;">Quote</label>
-                            <input id="quote" name="quote" type="text" placeholder="Your favorite quote" 
+                            <input 
+                                id="quote" 
+                                name="quote" 
+                                type="text" placeholder="Your favorite quote" 
                                 class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#996087] focus:border-[#996087] outline-none transition-all"
                             />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5" style="margin-bottom: 3px;">Avatar Picture</label>
+                            <label for="avatarPicture" class="block text-sm font-medium text-gray-700 mb-1.5" style="margin-bottom: 3px;">Avatar Picture</label>
                             <label class="flex items-center w-full border border-gray-300 rounded-lg cursor-pointer bg-white overflow-hidden hover:bg-gray-50 transition-colors">
                                 <span class="px-4 py-2 bg-gray-100 text-sm font-medium text-gray-700 border-r border-gray-300">Choose File</span>
                                 <span class="px-3 py-2 text-sm text-gray-500 truncate flex-1">
@@ -114,7 +172,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5" style="margin-bottom: 3px;">Profile Banner</label>
+                            <label for="profileBanner" class="block text-sm font-medium text-gray-700 mb-1.5" style="margin-bottom: 3px;">Profile Banner</label>
                             <label class="flex items-center w-full border border-gray-300 rounded-lg cursor-pointer bg-white overflow-hidden hover:bg-gray-50 transition-colors">
                                 <span class="px-4 py-2 bg-gray-100 text-sm font-medium text-gray-700 border-r border-gray-300">Choose File</span>
                                 <span class="px-3 py-2 text-sm text-gray-500 truncate flex-1">
