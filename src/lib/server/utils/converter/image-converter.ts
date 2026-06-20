@@ -1,21 +1,33 @@
-import { MAX_RESIZE_DIMENSION } from "$lib/constants";
+import type { TImagePreset } from "$lib/types/global";
 import { Result } from "$lib/types/global/result.types";
 import sharp from "sharp";
 
-export async function convertToWebpAsync(file: File)
+export async function convertToWebpAsync(file: File, preset: TImagePreset)
     : Promise<Result<Buffer>> 
 {
-
     try {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         
-        const webpBuffer = await sharp(buffer)
-            .resize(MAX_RESIZE_DIMENSION, MAX_RESIZE_DIMENSION, {
-                fit: 'inside',
-                withoutEnlargement: true
+        let pipeline = sharp(buffer);
+
+        if (preset === 'wide') {
+            pipeline = pipeline.resize(1200, 300, { 
+                fit: 'cover',
+                position: 'top'
+            });
+        } else if (preset === 'square') {
+            pipeline = pipeline.resize(400, 400, {
+                fit: 'cover',
+                position: 'center'
+            });
+        }
+
+        const webpBuffer = await pipeline
+            .webp({ 
+                quality: 90,
+                effort: 6 
             })
-            .webp({ quality: 75 })
             .toBuffer();
 
         return Result.success(webpBuffer);

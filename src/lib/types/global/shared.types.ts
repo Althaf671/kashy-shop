@@ -37,3 +37,10 @@ export type TGetPaginatedResponse<T> = {
         hasPrevPage: boolean;
     }
 }
+
+//-- Image compress type --------------------------
+export type TImagePreset = 
+    | 'square'    // 1:1
+    | 'wide'      // 4:1 (Banner)
+    | 'portrait'  // 3:4
+    | 'cinema'    // 16:9

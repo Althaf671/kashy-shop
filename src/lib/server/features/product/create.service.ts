@@ -30,7 +30,7 @@ export async function createProductAsync(data: TCreateProductRequest)
         if (checkDuplicate.isFailure) return Result.failure(checkDuplicate.error)
        
         // compress and upload multiple images to storage
-        const multiMediaResult = await processAndUploadMultiImagesAsync(payload.thumbnailPicture, payload.images)
+        const multiMediaResult = await processAndUploadMultiImagesAsync(payload.thumbnailPicture, payload.images, 'default')
         if (multiMediaResult.isFailure) return Result.failure(multiMediaResult.error)
 
         const { thumbnailResult, imagesResult } = multiMediaResult.value

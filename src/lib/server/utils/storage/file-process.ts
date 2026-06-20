@@ -1,10 +1,12 @@
-import { Result, type TCloudinaryFile } from "$lib/types/global";
+import { Result, type TCloudinaryFile, type TImagePreset } from "$lib/types/global";
 import { convertToWebpAsync } from "../converter/image-converter";
 import { deleteFileByPublicIdAsync, uploadFileAsync } from "./file-upload";
 
 //--- single upload -------------------
-export async function processAndUploadImageAsync(rawFile: File): Promise<Result<TCloudinaryFile>> {
-    const webpImage = await convertToWebpAsync(rawFile)
+export async function processAndUploadImageAsync(rawFile: File, preset: TImagePreset)
+    : Promise<Result<TCloudinaryFile>> 
+{
+    const webpImage = await convertToWebpAsync(rawFile, preset)
     if (webpImage.isFailure) {
         return Result.failure(webpImage.error)
     }
@@ -20,15 +22,16 @@ export async function processAndUploadImageAsync(rawFile: File): Promise<Result<
 //--- multi upload --------------------
 export async function processAndUploadMultiImagesAsync(
     thumbnail: File | undefined | null, 
-    images: File[] | undefined | null
+    images: File[] | undefined | null,
+    preset: TImagePreset,
 ): Promise<Result<{ thumbnailResult: TCloudinaryFile | undefined , imagesResult: TCloudinaryFile[] }>> 
 {
     const thumbnailTask = thumbnail !== undefined && thumbnail !== null
-        ? processAndUploadImageAsync(thumbnail)
+        ? processAndUploadImageAsync(thumbnail, preset)
         : Promise.resolve(null)
 
     const imagesTask = images !== undefined && Array.isArray(images)
-        ? images.map(file => processAndUploadImageAsync(file))
+        ? images.map(file => processAndUploadImageAsync(file, preset))
         : []
 
     const [thumbnailMetadata, ...imageMetadas] = await Promise.all([

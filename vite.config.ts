@@ -11,6 +11,8 @@ export default defineConfig({
 	},
 	test: {
 		expect: { requireAssertions: true },
+		environment: 'jsdom',
+		setupFiles: ['@testing-library/svelte/vitest'],
 		projects: [
 			{
 				extends: './vite.config.ts',

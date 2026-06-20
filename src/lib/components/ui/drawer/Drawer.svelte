@@ -6,19 +6,13 @@
         CloseCircleOutline, 
         EnvelopeSolid, 
         PhoneSolid, 
-        UploadOutline, 
         UserCircleOutline 
     } from 'flowbite-svelte-icons';
     import { enhance } from '$app/forms';
     import { page } from '$app/state';
-    import { 
-        Label, 
-        Input, 
-        Helper, 
-        Textarea, 
-        Spinner 
-    } from 'flowbite-svelte';
     import Modal from '../modal/Modal.svelte';
+    import FormField from '../FormField/FormField.svelte';
+	import Button from '../button/Button.svelte';
 
     // State props
     let { open = $bindable(), type }: { open: boolean, type: TDrawerType } = $props()
@@ -28,10 +22,6 @@
     let bannerFiles = $state<FileList | null>(null)
     let avatarInputRef = $state<HTMLInputElement | null>(null)
     let bannerInputRef = $state<HTMLInputElement | null>(null)
-
-    // File placeholder
-    let avatarFileName = $derived(avatarFiles && avatarFiles.length > 0 ? avatarFiles[0].name : 'Choose avatar picture')
-    let bannerFileName = $derived(bannerFiles && bannerFiles.length > 0 ? bannerFiles[0].name : 'Choose profile banner')
 
     // Submit form state
     let nameValue = $state('')
@@ -189,229 +179,128 @@
                     }}
                 >
                     <!-- fullname -->
-                    <div>
-                        <Label for="name" color={formErrors?.name ? 'red' : 'primary'} style="margin-bottom: 2.5px;" class="mb-1.5 text-sm font-[500]">Fullname</Label>
-                        <Input 
-                            id="name" 
-                            name="name" 
-                            type="text" 
-                            placeholder="Kashley Vanrogoue" 
-                            bind:value={nameValue}
-                            color={formErrors?.name ? 'red' : 'default'}
-                            disabled={updating}
-                            class="pl-9 shadow-xs text-gray-900 placeholder:text-gray-400"
-                        >
-                            {#snippet left()}
-                                <UserCircleOutline class="h-5 w-5 text-gray-400 mr-3" /> 
-                            {/snippet}
-                        </Input>
-                        {#if formErrors?.name}
-                            <Helper class="mt-1.5 text-xs" color="red">{formErrors.name}</Helper>
-                        {/if}
-                    </div>
+                    <FormField
+                        label="Fullname"
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="Kashley Vanrogue"
+                        bind:value={nameValue}
+                        error={formErrors?.name}
+                        disabled={updating}
+                    >
+                        {#snippet icon()}<UserCircleOutline />{/snippet}
+                    </FormField>
+
 
                     <!-- email -->
-                    <div>
-                        <Label for="email" color={formErrors?.email ? 'red' : 'primary'} style="margin-bottom: 2.5px;" class="mb-1.5 text-sm font-[500]">Email</Label>
-                        <Input 
-                            id="email" 
-                            name="email" 
-                            type="email" 
-                            placeholder="kashgallery@gmail.com" 
-                            bind:value={emailValue}
-                            color={formErrors?.email ? 'red' : 'default'}
-                            disabled={updating}
-                            class="pl-9 shadow-xs text-gray-900 placeholder:text-gray-400"
-                        >
-                            {#snippet left()}
-                                <EnvelopeSolid class="h-5 w-5 text-gray-400 mr-3" />
-                            {/snippet}
-                        </Input>
-                        {#if formErrors?.email}
-                            <Helper class="mt-1.5 text-xs" color="red">{formErrors.email}</Helper>
-                        {/if}
-                    </div>
+                    <FormField
+                        label="Email"
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="kashgallery24@gmail.com"
+                        bind:value={emailValue}
+                        error={formErrors?.email}
+                        disabled={updating}
+                    >
+                        {#snippet icon()}<EnvelopeSolid />{/snippet}
+                    </FormField>
 
                     <!-- phone -->
-                    <div>
-                        <Label for="phone" color={formErrors?.phone ? 'red' : 'primary'} style="margin-bottom: 2.5px;" class="mb-1.5 text-sm font-[500]">Phone</Label>
-                        <Input 
-                            id="phone" 
-                            name="phone" 
-                            type="text" 
-                            placeholder="+628123456789" 
-                            bind:value={phoneValue}
-                            color={formErrors?.phone ? 'red' : 'default'}
-                            disabled={updating}
-                            class="pl-9 shadow-xs text-gray-900 placeholder:text-gray-400"
-                        >
-                            {#snippet left()}
-                                <PhoneSolid class="h-5 w-5 text-gray-400 mr-3" />
-                            {/snippet}
-                        </Input>
-                        {#if formErrors?.phone}
-                            <Helper class="mt-1.5 text-xs" color="red">{formErrors.phone}</Helper>
-                        {/if}
-                    </div>
+                    <FormField
+                        label="Phone"
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="+6281234567"
+                        bind:value={phoneValue}
+                        error={formErrors?.phone}
+                        disabled={updating}
+                    >
+                        {#snippet icon()}<PhoneSolid />{/snippet}
+                    </FormField>
 
                     <!-- birthday -->
-                    <div>
-                        <Label for="birthdayAt" color={formErrors?.birthdayAt ? 'red' : 'primary'} style="margin-bottom: 2.5px;" class="mb-1.5 text-sm font-[500]">
-                            Birthday
-                        </Label>
-                        
-                        <input 
-                            type="date" 
-                            id="birthdayAt"
-                            name="birthdayAt" 
-                            bind:value={birthdayValue} 
-                            disabled={updating}
-                            class="w-full p-2.5 text-sm rounded-lg border bg-gray-50 text-gray-900 placeholder:text-gray-400 outline-none transition-colors shadow-xs
-                                focus:ring-2 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed
-                                {formErrors?.birthdayAt 
-                                    ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500 text-red-900' 
-                                    : 'border-gray-300 focus:ring-[#996087]/20 focus:border-[#996087]'}"
-                        />
-
-                        {#if formErrors?.birthdayAt}
-                            <Helper class="mt-1.5 text-xs" color="red">{formErrors.birthdayAt}</Helper>
-                        {/if}
-                    </div>
+                    <FormField
+                        label="Birthday"
+                        id="birthdayAt"
+                        name="birthdayAt"
+                        type="date"
+                        bind:value={birthdayValue}
+                        error={formErrors?.birthdayAt}
+                        disabled={updating}
+                    />
 
                     <!-- biography -->
-                    <div>
-                        <Label for="biography" color={formErrors?.biography ? 'red' : 'primary'} style="margin-bottom: 2.5px;" class="mb-1.5 text-sm font-[500]">Biography</Label>
-                        <Textarea 
-                            id="biography" 
-                            name="biography" 
-                            rows={3} 
-                            placeholder="Tell us about yourself..." 
-                            bind:value={biographyValue}
-                            color={formErrors?.biography ? 'red' : 'default'}
-                            disabled={updating}
-                            class="w-full text-sm text-gray-900 placeholder:text-gray-400 resize-none shadow-xs"
-                        />
-                        {#if formErrors?.biography}
-                            <Helper class="mt-1.5 text-xs" color="red">{formErrors.biography}</Helper>
-                        {/if}
-                    </div>
+                    <FormField
+                        label="Biography"
+                        id="biography"
+                        name="biography"
+                        type="textarea"
+                        placeholder="Tell about yourself..."
+                        rows={3}
+                        bind:value={biographyValue}
+                        error={formErrors?.biography}
+                        disabled={updating}
+                    />
 
                     <!-- quote -->
-                    <div style="margin-top: -8px;">
-                        <Label for="quote" color={formErrors?.biography ? 'red' : 'primary'} style="margin-bottom: 2.5px;" class="mb-1.5 text-sm font-[500]">Quote</Label>
-                        <Input 
-                            id="quote" 
-                            name="quote" 
-                            type="text" 
-                            placeholder="Your favorite quote" 
-                            bind:value={quoteValue}
-                            disabled={updating}
-                            class="text-gray-900 placeholder:text-gray-400 shadow-xs"
-                        />
-                        {#if formErrors?.quote}
-                            <Helper class="mt-1.5 text-xs" color="red">{formErrors.quote}</Helper>
-                        {/if}
-                    </div>
+                    <FormField
+                        label="Quote"
+                        id="quote"
+                        name="quote"
+                        type="text"
+                        placeholder="Whats is in your mind?"
+                        bind:value={quoteValue}
+                        error={formErrors?.quote}
+                        disabled={updating}
+                    />
                     
                     <!-- avatar picture -->
-                    <div>
-                        <Label for="avatarPicture" color={formErrors?.avatarPicture ? 'red' : 'primary'} style="margin-bottom: 2.5px;" class="mb-1.5 text-sm font-[500]">Avatar Picture</Label>
-                        
-                        <input 
-                            type="file"
-                            id="avatarPicture" 
-                            name="avatarPicture"
-                            accept=".jpg,.png,.jpeg"
-                            bind:this={avatarInputRef} 
-                            bind:files={avatarFiles}
-                            onchange={handleAvatarChange}
-                            disabled={updating}
-                            class="hidden"
-                        />
-
-                        <button
-                            type="button"
-                            onclick={() => avatarInputRef?.click()}
-                            disabled={updating}
-                            class="w-full flex items-center text-left px-3 py-2.5 text-sm rounded-lg border bg-gray-50 shadow-xs transition-colors outline-none
-                                focus:ring-2 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed
-                                {formErrors?.avatarPicture 
-                                    ? 'border-red-500 focus:ring-red-500/20 text-red-900' 
-                                    : 'border-gray-300 focus:ring-[#996087]/20 text-gray-900'}"
-                        >
-                            <UploadOutline class="h-5 w-5 text-gray-400 mr-3 shrink-0" />
-                            
-                            <span class="truncate text-sm pl-1 {avatarFiles && avatarFiles.length > 0 ? 'text-gray-900' : 'text-gray-700'}">
-                                {avatarFileName}
-                            </span>
-                        </button>
-
-                        <Helper class="text-xs text-gray-400 mt-1">PNG, JPG or JPEG.</Helper>
-                        {#if formErrors?.avatarPicture}
-                            <Helper class="mt-1.5 text-xs" color="red">{formErrors.avatarPicture}</Helper>
-                        {/if}
-                    </div>
+                    <FormField
+                        label="Avatar Picture"
+                        id="avatarPicture"
+                        name="avatarPicture"
+                        type="file"
+                        accept=".jpg,.png,.jpeg"
+                        hint="PNG, JPG or JPEG."
+                        bind:files={avatarFiles}
+                        bind:inputRef={avatarInputRef}
+                        onFileChange={handleAvatarChange}
+                        error={formErrors?.avatarPicture}
+                        disabled={updating}
+                    />
 
                     <!-- profile banner -->
-                    <div>
-                        <Label for="profileBanner" color={formErrors?.profileBanner ? 'red' : 'primary'} style="margin-bottom: 2.5px;" class="mb-1.5 text-sm font-[500]">Profile Banner</Label>
-                        
-                        <input 
-                            type="file"
-                            id="profileBanner" 
-                            name="profileBanner"
-                            accept=".jpg,.png,.jpeg"
-                            bind:this={bannerInputRef} 
-                            bind:files={bannerFiles}
-                            onchange={handleBannerChange}
-                            disabled={updating}
-                            class="hidden"
-                        />
+                    <FormField
+                        label="Profile Banner"
+                        id="profileBanner"
+                        name="profileBanner"
+                        type="file"
+                        accept=".jpg,.png,.jpeg"
+                        hint="PNG, JPG or JPEG."
+                        bind:files={bannerFiles}
+                        bind:inputRef={bannerInputRef}
+                        onFileChange={handleBannerChange}
+                        error={formErrors?.profileBanner}
+                        disabled={updating}
+                    />
 
-                        <button
-                            type="button"
-                            onclick={() => bannerInputRef?.click()}
-                            disabled={updating}
-                            class="w-full flex items-center text-left px-3 py-2.5 text-sm rounded-lg border bg-gray-50 shadow-xs transition-colors outline-none
-                                focus:ring-2 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed
-                                {formErrors?.profileBanner 
-                                    ? 'border-red-500 focus:ring-red-500/20 text-red-900' 
-                                    : 'border-gray-300 focus:ring-[#996087]/20 text-gray-900'}"
+                    <div class="flex gap-3">
+                        <Button
+                            type="submit"
+                            size="lg"
+                            fullWidth
+                            loading={updating}
+                            loadingText="Updating..."
+                            disabled={isFormEmpty}
                         >
-                            <UploadOutline class="h-5 w-5 text-gray-400 shrink-0" />
-                            
-                            <span class="truncate text-sm pl-1 {bannerFiles && bannerFiles.length > 0 ? 'text-gray-900' : 'text-gray-700'}">
-                                {bannerFileName}
-                            </span>
-                        </button>
-
-                        <Helper class="text-xs text-gray-400 mt-1">PNG, JPG or JPEG.</Helper>
-                        {#if formErrors?.profileBanner}
-                            <Helper class="mt-1.5 text-xs" color="red">{formErrors.profileBanner}</Helper>
-                        {/if}
-                    </div>
-
-                    <div class="flex gap-3 pt-4 border-t border-gray-100 mt-8">
-                        <button 
-                            type="submit" 
-                            disabled={updating || isFormEmpty}
-                            class="w-full py-2.5 bg-[#996087] shadow-xs text-white font-medium rounded-lg hover:bg-[#855376] transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                            {#if updating}
-                                <Spinner size="4" color='primary' />
-                                <span>Updating...</span>
-                            {:else}
-                                Update Profile
-                            {/if}
-                        </button>
-                        <button 
-                            type="button" 
-                            onclick={() => open = false} 
-                            disabled={updating}
-                            class="w-full shadow-xs py-2.5 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
+                            Update Profile
+                        </Button>
+                        <Button variant="secondary" size="lg" fullWidth disabled={updating} onclick={() => (open = false)}>
                             Cancel
-                        </button>
+                        </Button>
                     </div>
                 </form>
             {/if}

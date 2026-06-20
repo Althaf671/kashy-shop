@@ -142,7 +142,7 @@ export async function patchMyProfileAsync(data: TPatchMyProfileRequest)
 
         // compress and upload avatar
         if (patchData.avatarPicture !== undefined) {
-            const mediaResult = await processAndUploadImageAsync(patchData.avatarPicture)
+            const mediaResult = await processAndUploadImageAsync(patchData.avatarPicture, 'square')
             if (mediaResult.isFailure) return Result.failure(mediaResult.error)
 
             if (mediaResult) {
@@ -153,7 +153,7 @@ export async function patchMyProfileAsync(data: TPatchMyProfileRequest)
 
         // compress and upload banner
         if (patchData.profileBanner !== undefined) {
-            const mediaResult = await processAndUploadImageAsync(patchData.profileBanner)
+            const mediaResult = await processAndUploadImageAsync(patchData.profileBanner, 'wide')
             if (mediaResult.isFailure) return Result.failure(mediaResult.error)
 
             if (mediaResult) {

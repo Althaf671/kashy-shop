@@ -53,7 +53,7 @@
         <Card class="relative rounded-lg shadow-xs bg-white pb-3 overflow-visible">
             <img 
                 src={myProfile.profileBanner?.fileUrl}
-                class="!w-full aspect-[4/1] object-cover block rounded-t-lg" 
+                class="w-full aspect-[4/1] object-cover object-top block rounded-t-lg" 
                 alt="Profile Banner" 
             />
             
@@ -187,7 +187,7 @@
                             <p class="text-[0.75rem] text-gray-500">{item.os} - {item.browser}</p>
                             <p class="text-[0.75rem] text-gray-400">Expired in: {item.expiredAt}</p>
                         </div>
-                        <Button class="absolute border-none shadow-none -right-1 bottom-1 text-gray-400 cursor-pointer">
+                        <Button class="absolute border-none shadow-none right-3 bottom-1 text-gray-400 cursor-pointer">
                             <HugeiconsIcon icon={ArrowUpRight03Icon} size={18} />
                         </Button>
                     </Card>
