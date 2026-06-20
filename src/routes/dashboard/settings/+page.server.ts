@@ -46,18 +46,19 @@ export const actions: Actions = {
 
         const result = await patchMyProfileAsync(data)
         if (result.isFailure)  {
-            const description = result.error.description
+            const description = result.error.description 
+            const fieldError = description ? description.split(',').map(desc => desc.trim()) : []
             return fail(400, { 
                 success: false,
                 errors: {
-                    name: description?.includes('name') ? description : undefined,
-                    email: description?.includes('email') ? description : undefined,
-                    phone: description?.includes('phone') ? description : undefined,
-                    birthdayAt: description?.includes('birthdayAt') ? description : undefined,
-                    biography: description?.includes('biography') ? description : undefined,
-                    quote: description?.includes('quote') ? description : undefined,
-                    profileBanner: description?.includes('profileBanner') ? description : undefined,
-                    avatarPicture: description?.includes('avatarPicture') ? description : undefined,
+                    name: fieldError.find(err => err.startsWith('name')),
+                    email: fieldError.find(err => err.startsWith('email')),
+                    phone: fieldError.find(err => err.startsWith('phone')),
+                    birthdayAt: fieldError.find(err => err.startsWith('birthdayAt')),
+                    biography: fieldError.find(err => err.startsWith('biography')),
+                    quote: fieldError.find(err => err.startsWith('quote')),
+                    profileBanner: fieldError.find(err => err.startsWith('profileBanner')),
+                    avatarPicture: fieldError.find(err => err.startsWith('avatarPicture')),
                 } as TFormErrors
             });
         }

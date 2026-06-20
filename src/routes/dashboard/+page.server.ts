@@ -2,7 +2,7 @@ import { getDashboardAggregateDataAsync } from "$lib/server/features/aggregate/d
 import type { IUser } from "$lib/types/features";
 import type { IMetricItem, TCardProps } from "$lib/types/global/ui.types";
 import type { Actions } from "./$types";
-import { getIconForMetric } from "$lib/utils/icon-manager";
+import { getIconForMetric } from "$lib/utils/iconManager";
 
 export async function load()
     : Promise<{ metrics: TCardProps[], error?: unknown }> 

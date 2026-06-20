@@ -81,7 +81,7 @@ export const PatchMyProfileScheme = z.object({
         .min(10, { error: "Minimum email length is 10 characters." })
         .max(USERS_CONSTRAINT.emailLength, { error: `Maximum email length is ${USERS_CONSTRAINT.emailLength}.` })
         .optional(),
-    phone: z.e164(`Please input a valid phone number. (eg: +628xxx)`)
+    phone: z.e164(`Please input a valid phone number. (eg: +628123456789)`)
         .trim()
         .optional(),
     birthdayAt: z

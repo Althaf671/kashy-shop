@@ -52,7 +52,7 @@
     {:else}
         <Card class="relative rounded-lg shadow-xs bg-white pb-3 overflow-visible">
             <img 
-                src="https://i.redd.it/liyue-harbor-and-wangshu-inn-backgrounds-from-the-new-event-v0-fidyq5valih61.jpg?width=1707&format=pjpg&auto=webp&s=c20b13494e9b8b0d93166333953fa7eb2257dbe4"
+                src={myProfile.profileBanner?.fileUrl}
                 class="!w-full aspect-[4/1] object-cover block rounded-t-lg" 
                 alt="Profile Banner" 
             />
@@ -68,7 +68,7 @@
                     
                     <div class="pb-3">
                         <p class="font-semibold text-[1.2rem] sm:text-[1.35rem]">{myProfile.name}</p>
-                        <p class="text-[0.75rem] sm:text-[0.8rem] text-gray-400 -mt-1">{myProfile.email}</p>
+                        <p class="text-[0.75rem] sm:text-[0.8rem] text-gray-400" style="margin-top: -3px;">{myProfile.email}</p>
                     </div>
                 </div>
             </div>

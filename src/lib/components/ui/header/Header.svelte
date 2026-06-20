@@ -53,7 +53,7 @@
     <div class="flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
 
         <div class="text-[0.88rem] text-[#6b7280] font-medium flex items-center tracking-[-0.1px] gap-2">
-            <span class="font-bold text-[#1a1c23] tabular-nums">{currentTime}</span>
+            <span class="font-[600] text-[#1a1c23] tabular-nums">{currentTime}</span>
             <span class="text-[#d1d5db]">|</span>
             <span class="date-text">{currentDate}</span>
         </div>
