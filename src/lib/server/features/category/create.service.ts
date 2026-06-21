@@ -1,10 +1,12 @@
 import { Result } from "$lib/types/global/result.types";
 import { and, eq, ilike, or } from "drizzle-orm";
-import { cleanupPreviousFileAsync, findSpecificErrorValues, processAndUploadImageAsync } from "$lib/server/utils";
+import { cleanupPreviousFileAsync, findSpecificErrorValues, processAndUploadImageAsync, type ErrorPair } from "$lib/server/utils";
 import { CreateCategorySchema, type TCreateCategoryRequest, type TCreateCategoryResponse } from "$lib/types/features";
 import { categories, db } from "$lib/server/data";
 import { type TCloudinaryFile } from "$lib/types/global";
 import { messages, statusCodes } from "$lib/constants";
+
+// [FATAL]: NEED TO RECHECK
 
 const DOMAIN = "CategoryService" as const
 
@@ -25,7 +27,7 @@ export async function createCategoryAsync(data: TCreateCategoryRequest)
         if (checkDuplicate.isFailure) return Result.failure(checkDuplicate.error)
 
         // compress and upload image to storage
-        const thumbnailMetadata = await processAndUploadImageAsync(payload.thumbnailPicture)
+        const thumbnailMetadata = await processAndUploadImageAsync(payload.thumbnailPicture, 'square')
         if (thumbnailMetadata.isFailure) return Result.failure(thumbnailMetadata.error) 
 
         finalThumbnail = thumbnailMetadata.value
@@ -44,7 +46,8 @@ export async function createCategoryAsync(data: TCreateCategoryRequest)
         
         const response: TCreateCategoryResponse = {
             id: insertedCategory.id,
-            slug: insertedCategory.slug
+            slug: insertedCategory.slug,
+            message: `Success adding ${insertedCategory.name} to category!`
         } as const
 
         return Result.success(response)
@@ -77,14 +80,16 @@ async function checkDuplicateSlugOrNameAsync(name: string, slug: string)
             
     if (categoryRecord) {
         if (!categoryRecord.isSoftDeleted) {
-            const specificReason = findSpecificErrorValues(
-                { ori: categoryRecord.name, current: name },
-                { ori: categoryRecord.slug, current: slug }
-            );
+            const pairsToCheck: ErrorPair<string>[] = [
+                { field: "slug", ori: categoryRecord.slug, current: slug },
+                { field: "name", ori: categoryRecord.name, current: name }
+            ];
+
+            const duplicate = findSpecificErrorValues(pairsToCheck);
 
             return Result.failure({ 
                 code: statusCodes.DUPLICATED, 
-                description: messages.DUPLICATED("Category", typeof(specificReason), specificReason), 
+                description: messages.DUPLICATED("Category", duplicate!.field, duplicate!.current), 
                 domain: DOMAIN 
             })
         }

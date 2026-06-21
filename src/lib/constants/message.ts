@@ -11,7 +11,7 @@ export const messages = {
     },
     /** @returns `${entity} with ${itemInput}: ${itemInputValue} is already exist.` */
     DUPLICATED(entity: string, itemInput: string, itemInputValue: string): string {
-        return `${entity} with ${itemInput}: ${itemInputValue} is already exist, ${KASH}.` 
+        return `${entity} with ${itemInput} ${itemInputValue} is already exist, ${KASH}.` 
     },
     /** @returns `Invalid ${entity}: ${detailOrComparison}.`
      * or @returns `${entity} ${current} cannot be ${comparison} than ${limit}.`
@@ -29,5 +29,6 @@ export const messages = {
     },
     TO_MANY_REQUEST(minutes: number): string { 
         return `Slow down, You are attempting to many request, try again within ${minutes} minutes.`
-    }
+    },
+    SERVER_ERROR: "Something went wrong."
 } as const

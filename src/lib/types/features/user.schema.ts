@@ -73,7 +73,7 @@ export const PatchMyProfileScheme = z.object({
     userId: z.uuid({ error: "Invalid user Id." }),
     name: z
         .string()
-        .min(3, `Minimum 3 charaters.`)
+        .min(3, `Minimum name length is 3 charaters.`)
         .max(USERS_CONSTRAINT.nameLength, `Maximum ${USERS_CONSTRAINT.nameLength} characters, ${KASH}.`)
         .optional(),
     email: z
@@ -89,7 +89,7 @@ export const PatchMyProfileScheme = z.object({
         .optional(),
     biography: z
         .string()
-        .min(5, `Minimum 5 charaters.`)
+        .min(5, `Minimum biography length is 5 charaters.`)
         .max(USERS_CONSTRAINT.BIO_MAX_LENGTH, `Maximum ${USERS_CONSTRAINT.BIO_MAX_LENGTH} characters, ${KASH}.`)
         .optional(),
     profileBanner: z
@@ -99,7 +99,7 @@ export const PatchMyProfileScheme = z.object({
         .optional(),
     quote: z
         .string()
-        .min(5, `Minimum 5 charaters.`)
+        .min(5, `Minimum quote length is 5 charaters.`)
         .max(USERS_CONSTRAINT.QUOTE_MAX_LENGTH, `Maximum ${USERS_CONSTRAINT.QUOTE_MAX_LENGTH} characters, ${KASH}.`)
         .optional(),
     avatarPicture: z
@@ -112,8 +112,7 @@ export const PatchMyProfileScheme = z.object({
 export type TPatchMyProfileRequest = z.infer<typeof PatchMyProfileScheme>
 
 export type TPatchMyProfileResponse = {
-    id: string;
-    name: string;
+    message: string;
 }
 
 //--- get my session list -----------------

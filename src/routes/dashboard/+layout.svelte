@@ -31,7 +31,7 @@
     <Sidebar content={sidebarItem} data={data.myProfile} />
 
     <div class="flex flex-col w-full h-screen bg-[#fbfaf6] pt-0 px-[1rem] md:px-[1.5rem] lg:px-[1.75rem] pb-[1.5rem] overflow-y-auto">
-        <Header onToggle={() => drawer.open = true} />
+        <Header />
         {@render children()}
         <Footer />
     </div>

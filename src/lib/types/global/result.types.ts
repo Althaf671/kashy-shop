@@ -48,7 +48,7 @@ export class Result<T> {
     ): Result<T> {
         const errMessage = zodError.issues
             .map(issue => `${issue.path.join('.')}: ${issue.message}`)
-            .join(', ');
+            .join(', ')
 
         return Result.failure<T>({
             code: statusCodes.VALIDATION_ERROR,

@@ -177,15 +177,15 @@
         // Shape
         'rounded-xl',
         // Background & text
-        'bg-gray-100 text-gray-900 placeholder:text-gray-400',
+        'bg-gray-50 text-gray-900 placeholder:text-gray-400',
         // Border
         'border',
         hasError ? 'border-red-400' : 'border-gray-200',
         // Outline / focus ring
         'outline-none transition-all duration-150',
         hasError
-            ? 'focus:ring-2 focus:ring-red-400/20 focus:border-red-400'
-            : 'focus:ring-2 focus:ring-[#996087]/20 focus:border-[#996087]',
+            ? 'focus:ring-2 focus:ring-red-400/90 focus:border-red-400'
+            : 'focus:ring-2 focus:ring-[#996087]/90 focus:border-[#996087]',
         // Disabled state
         'disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed',
     ].join(' '));
@@ -287,7 +287,7 @@
                 <!-- Upload icon -->
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="h-4.5 w-4.5 shrink-0 text-gray-400"
+                    class="h-4.5 w-4.5 shrink-0 text-gray-700"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

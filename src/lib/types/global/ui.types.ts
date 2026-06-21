@@ -62,10 +62,20 @@ export interface INotificationItem {
     content: string;
 }
 
+export interface ISessionItem {
+    device: string;
+    browser: string;
+    os: string;
+    expiredAt: string;
+    ipAddress: string;
+    lastActivity: string;
+}
+
 export type TCardProps = 
     | { type: "metric", item: IMetricItem }
     | { type: "action", item: IActionItem }
     | { type: "notification", item: INotificationItem }
+    | { type: "session", item: ISessionItem }
 
 //--- Chart Props ----------------
 interface IChartData {
@@ -116,6 +126,12 @@ export type TDrawerType =
     | 'patch-profile-form'
 
 //--- Toast Props ----------------
+export type TToastProps = {
+    success: boolean;
+    type: TToastType;
+    message: string | undefined;
+}
+
 export const TOAST_TYPE = {
     SUCCESS: 'success',
     ERROR: 'error',
@@ -134,4 +150,9 @@ export type TFormErrors = {
     quote?: string;
     profileBanner?: string;
     avatarPicture?: string;
+    
+    // category
+    description: string;
+    thumbnailPicture: string;
+    slug: string;
 };

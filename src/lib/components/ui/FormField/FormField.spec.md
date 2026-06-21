@@ -81,7 +81,7 @@ future form in the app.
 ### Input (text / email / tel / password / date)
 - Background: `bg-gray-100`
 - Border: `border border-gray-200`, radius `rounded-xl`
-- Focus ring: `focus:ring-2 focus:ring-[#996087]/20 focus:border-[#996087]`
+- Focus ring: `focus:ring-2 focus:ring-[#996087]/90 focus:border-[#996087]`
 - Error state border: `border-red-400`, ring `focus:ring-red-400/20`
 - Disabled: `bg-gray-50 text-gray-400 cursor-not-allowed`
 - Padding: `px-3.5 py-2.5`

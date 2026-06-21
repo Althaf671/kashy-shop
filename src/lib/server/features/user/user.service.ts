@@ -69,7 +69,7 @@ export async function GetMyProfileDetailsAsync(data: TGetMyProfileDetailsRequest
 
         return Result.success(userData)
     } catch (error: unknown) {
-        return Result.serverError(error, DOMAIN)
+        return Result.serverError(messages.SERVER_ERROR, DOMAIN)
     }
 }
 
@@ -104,7 +104,7 @@ export async function getMySessionListAsync(data: TGetMySessionListRequest)
 
         return Result.success(result)
     } catch (error: unknown) {
-        return Result.serverError(error, DOMAIN)
+        return Result.serverError(messages.SERVER_ERROR, DOMAIN)
     }
 }
 
@@ -163,7 +163,7 @@ export async function patchMyProfileAsync(data: TPatchMyProfileRequest)
         }
 
         // save to database
-        const [patchedUser] = await db
+        await db
             .update(users)
             .set({
                 ...(patchData.name !== undefined && { name: patchData.name }),
@@ -183,17 +183,12 @@ export async function patchMyProfileAsync(data: TPatchMyProfileRequest)
         await cleanupPreviousFileAsync(prevAvatar)
         await cleanupPreviousFileAsync(prevBanner)
 
-        const response: TPatchMyProfileResponse = {
-            id: patchedUser.id,
-            name: patchedUser.name
-        }
-
-        return Result.success(response)
+        return Result.success({ message: "Success updating your personal information." })
     } catch (error: unknown) {
         // rollback uploaded image if save db failed
         await cleanupPreviousFileAsync(finalAvatar)
         await cleanupPreviousFileAsync(finalBanner)
-        return Result.serverError(error, DOMAIN)
+        return Result.serverError(messages.SERVER_ERROR, DOMAIN)
     }
 }
 

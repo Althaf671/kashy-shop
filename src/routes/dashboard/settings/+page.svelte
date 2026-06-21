@@ -1,21 +1,18 @@
 <script lang="ts">
 	import { navigating } from '$app/state';
+	import Button from '$lib/components/ui/button/Button.svelte';
+	import Card from '$lib/components/ui/card/Card.svelte';
 	import Skeleton from '$lib/components/ui/skeleton/Skeleton.svelte';
     import { HEADER_KEY, type THeaderData } from '$lib/stores/global/context.js';
 	import { openDrawer } from '$lib/stores/global/drawer.svelte.js';
+	import { type ISessionItem } from '$lib/types/global/ui.types.js';
     import { 
-        ArrowUpRight03Icon, 
-        ComputerPhoneSyncIcon, 
         Edit02Icon, 
-        LaptopIcon, 
         Profile02Icon, 
         ShieldKeyIcon, 
-		SmartPhone02Icon, 
-		Tablet01Icon
-
     } from '@hugeicons/core-free-icons';
     import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { Button, Card, Heading } from 'flowbite-svelte';
+	import { Heading } from 'flowbite-svelte';
     import { getContext } from 'svelte';
 
     // header props
@@ -25,21 +22,13 @@
         headerData.description = "Manage your personal data and monitor sessions.";
     });
     
-    const { data } = $props()
-    const { mySessions, myProfile } = $derived(data)
-
     // loading state
     let isLoading = $derived(!!navigating.to)
 
-    function getDeviceIcon(item: { device: string, os: string }) {
-        const info = (item.device + " " + item.os).toLowerCase();
-        
-        if (info.includes("ipad") || info.includes("tablet")) return Tablet01Icon;
-        if (info.includes("mobile") || info.includes("ios") || info.includes("android")) return SmartPhone02Icon;
-        if (info.includes("pc") || info.includes("windows") || info.includes("mac") || info.includes("laptop")) return LaptopIcon;
-        
-        return ComputerPhoneSyncIcon; 
-    }
+    // accordion of session details
+    const { data } = $props()
+    const { mySessions, myProfile } = $derived(data)
+
 </script>
 
 <main class="flex flex-col gap-6 pt-6">
@@ -50,10 +39,10 @@
     {:else if myProfile === undefined}
         <Skeleton type='banner' />
     {:else}
-        <Card class="relative rounded-lg shadow-xs bg-white pb-3 overflow-visible">
+        <div class="relative rounded-lg shadow-xs bg-white pb-3 overflow-visible">
             <img 
                 src={myProfile.profileBanner?.fileUrl}
-                class="w-full aspect-[4/1] object-cover object-top block rounded-t-lg" 
+                class="w-full aspect-[3.5/1] object-cover object-top block rounded-t-lg" 
                 alt="Profile Banner" 
             />
             
@@ -73,28 +62,26 @@
                 </div>
             </div>
 
-            <Button 
-                onclick={() => openDrawer('patch-profile-form')}
-                type="submit" 
-                class="text-sm absolute bottom-5 right-4 bg-[#996087] flex gap-1 text-[#f4f3ee] px-3 py-1.5 shadow-sm rounded-md cursor-pointer transition-colors"
-                title="Patch My Profile Form"
-            >
+            <!-- edit toggle button-->
+            <Button variant="primary" class="absolute bottom-5 right-4" onclick={() => openDrawer('patch-profile-form', 'Change your personal information.')}>
+                {#snippet icon()}
+                    <HugeiconsIcon 
+                        icon={Edit02Icon} 
+                        size={16} 
+                        color="#f4f3ee" 
+                        strokeWidth={1.65} 
+                    />  
+                {/snippet}
                 Edit
-                <HugeiconsIcon 
-                    icon={Edit02Icon} 
-                    size={16} 
-                    color="#f4f3ee" 
-                    strokeWidth={1.65} 
-                />  
             </Button>
-        </Card>
+        </div>
     {/if}
     
     <!-- Information Container -->
     <div class="flex flex-col md:flex-row gap-6 w-full">
         
         <!-- Personal Info -->
-        <Card class="w-full md:w-[60%] bg-white rounded-lg shadow-xs p-6 min-h-[350px]">
+        <div class="w-full md:w-[60%] bg-white rounded-lg shadow-xs p-6 min-h-[350px]">
             <!-- Header -->
             <div class="flex items-center gap-4 mb-6 pb-3">
                 <!-- Icon Container -->
@@ -157,10 +144,10 @@
                 </div>
 
             </div>
-        </Card>
+        </div>
 
         <!-- Session List -->
-        <Card class="w-full md:w-[38%] bg-white rounded-lg shadow-xs flex flex-col min-h-[350px]">
+        <div class="w-full md:w-[38%] bg-white rounded-lg shadow-xs flex flex-col h-[350px] min-h-[350px]">
             <!-- Header List -->
             <div class="flex items-center justify-between px-4 py-3 bg-[#996087] text-[#f4f3ee] rounded-t-lg">
                 <div class="flex items-center gap-1.5">
@@ -169,7 +156,7 @@
                 </div>
                 
                 <form action="/?/logoutAll" method="POST">
-                    <Button type="submit" class="text-xs text-[#996087] bg-white hover:bg-white/90 cursor-pointer px-2.5 py-1.25 rounded-md transition-colors">
+                    <Button variant="secondary" size="sm" type='submit'>
                         Logout All
                     </Button>
                 </form>
@@ -178,21 +165,9 @@
             <!-- List -->
             <div class="flex flex-col p-3 gap-3.5 overflow-y-auto">
                 {#each mySessions as item (item)}
-                    <Card class="flex flex-row border cursor-default border-gray-100 shadow-xs rounded-md px-3 py-2.5 flex gap-3 relative hover:bg-gray-50 transition-colors">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-sm bg-gray-100">
-                            <HugeiconsIcon icon={getDeviceIcon(item)} size={28} color="#7d7d7d" strokeWidth={1.65} />
-                        </div>
-                        <div class="flex flex-col">
-                            <Heading tag="h4" class="text-sm font-[500] text-gray-900">{item.device}</Heading>
-                            <p class="text-[0.75rem] text-gray-500">{item.os} - {item.browser}</p>
-                            <p class="text-[0.75rem] text-gray-400">Expired in: {item.expiredAt}</p>
-                        </div>
-                        <Button class="absolute border-none shadow-none right-3 bottom-1 text-gray-400 cursor-pointer">
-                            <HugeiconsIcon icon={ArrowUpRight03Icon} size={18} />
-                        </Button>
-                    </Card>
+                    <Card content={{ type: 'session', item: item as ISessionItem }} isLoading={isLoading} />
                 {/each}
             </div>
-        </Card>
+        </div>
     </div>
 </main>

@@ -6,9 +6,7 @@
     import { Button, Heading } from 'flowbite-svelte';
 	import { APP_COLORS } from '$lib/types/global/ui.types';
 	import SearchBar from '../searchInput/SearchBar.svelte';
-
-    // notification bind
-    let { onToggle } = $props();
+	import { openDrawer } from '$lib/stores/global/drawer.svelte';
 
     // title props
     const header: THeaderData = getContext(HEADER_KEY);
@@ -63,7 +61,7 @@
             <SearchBar />
 
             <Button 
-                onclick={onToggle} 
+                onclick={() => { openDrawer('notification') }} 
                 class="action-btn !rounded-lg !bg-white !border !border-[#e5e7eb] !w-10 !h-10 !flex !items-center !justify-center !cursor-pointer transition-all duration-200 ease-in-out !shadow-[0_2px_6px_rgba(0,0,0,0.02)] !p-0 hover:!bg-[#f9fafb] hover:!border-[#d1d5db]" 
                 title="Notifications"
             >

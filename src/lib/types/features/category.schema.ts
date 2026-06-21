@@ -7,7 +7,7 @@ import { size } from "$lib/server/utils/general/size";
 //--- create -------------------------------------
 export const CreateCategorySchema = z.object({
     name: z
-        .string()
+        .string({ error: `Name can't be empty ${KASH}.` })
         .trim()
         .min(5, { error: `Minimum 5 characters, ${KASH}.`})
         .max(CATEGORIES_CONSTRAINT.nameLength, `Maximum ${CATEGORIES_CONSTRAINT.nameLength} characters, ${KASH}.`),
@@ -29,7 +29,7 @@ export const CreateCategorySchema = z.object({
         .max(CATEGORIES_CONSTRAINT.slugLength,`Maximum ${CATEGORIES_CONSTRAINT.slugLength} characters, ${KASH}.`),
 })
 export type TCreateCategoryRequest = z.infer<typeof CreateCategorySchema>
-export type TCreateCategoryResponse = { id: string; slug: string; }
+export type TCreateCategoryResponse = { id: string; slug: string; message: string; }
 
 //--- update by id -------------------------------
 export const UpdateCategoryByIdSchema = z.object({ 

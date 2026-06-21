@@ -50,6 +50,9 @@
         console.log("Filtering metric...")
     }
 
+    // dropdown state
+    let open = $state(false)
+
 </script>
 
 <div class="dashboard__container bg-[{APP_COLORS.DARK_BACKGROUND}]">
@@ -68,7 +71,10 @@
                 variant="secondary"
                 ariaHaspopup="listbox"
                 ariaExpanded={open}
-                onclick={() => (open = !open)}
+                onclick={() => {
+                    open = !open
+                    filterMetric()
+                }}
             >
               {#snippet icon()}<CalendarMonthOutline class="h-4 w-4 text-[#7d7d7d]" />{/snippet}
               {selectedRange}

@@ -1,15 +1,39 @@
 <script lang="ts">
     import type { TCardProps } from "$lib/types/global/ui.types";
-    import { SmileIcon } from "@hugeicons/core-free-icons";
+    import { 
+        ChevronDownIcon, 
+        ChevronUpIcon, 
+        ComputerPhoneSyncIcon, 
+        LaptopIcon, 
+        Logout01Icon, 
+        SmartPhone02Icon, 
+        SmileIcon, 
+        Tablet01Icon 
+    } from "@hugeicons/core-free-icons";
     import { HugeiconsIcon } from '@hugeicons/svelte';
     import { Card, Span } from 'flowbite-svelte';
 	import Skeleton from "../skeleton/Skeleton.svelte";
+	import Button from "../button/Button.svelte";
+	import { slide } from "svelte/transition";
 
     // props from parent
     let { content, isLoading = false }: { 
       content: TCardProps, 
       isLoading: boolean } = $props()
 
+    // get device type
+    function getDeviceIcon(item: { device: string, os: string }) {
+        const info = (item.device + " " + item.os).toLowerCase();
+        
+        if (info.includes("ipad") || info.includes("tablet")) return Tablet01Icon;
+        if (info.includes("mobile") || info.includes("ios") || info.includes("android")) return SmartPhone02Icon;
+        if (info.includes("pc") || info.includes("windows") || info.includes("mac") || info.includes("laptop")) return LaptopIcon;
+        
+        return ComputerPhoneSyncIcon; 
+    }
+
+    // modal of session details
+    let isSessionExpanded = $state(false);
 </script>
 
 {#if isLoading}
@@ -102,10 +126,50 @@
       <div class="action-card">Action Card</div>
   {:else if content.type === "notification"}
       <div class="notification-card">Notification Card</div>
+  {:else if content.type === 'session'}
+    <Card class="flex flex-col border border-gray-100 shadow-xs rounded-md px-3 py-2.5 gap-0 transition-all">
+        <div class="flex flex-row items-center gap-3 w-full">
+            <div class="flex h-12 w-12 items-center justify-center rounded-sm bg-gray-100 shrink-0">
+                <HugeiconsIcon icon={getDeviceIcon(content.item)} size={28} color="#7d7d7d" strokeWidth={1.65} />
+            </div>
+            
+            <div class="flex flex-col flex-grow">
+                <h4 class="text-sm font-[500] text-gray-900">{content.item.device}</h4>
+                <p class="text-[0.75rem] text-gray-500">{content.item.os} - {content.item.browser}</p>
+                <p class="text-[0.75rem] text-gray-400">Expired in: {content.item.expiredAt}</p>
+            </div>
+
+            {#if isSessionExpanded}
+                <Button variant="ghost" size="sm" onclick={() => isSessionExpanded = !isSessionExpanded} class="shrink-0">
+                    {#snippet icon()}
+                        <HugeiconsIcon icon={ChevronUpIcon} size={18} />
+                    {/snippet}
+                </Button>
+            {:else}
+                <Button variant="ghost" size="sm" onclick={() => isSessionExpanded = !isSessionExpanded} class="shrink-0">
+                    {#snippet icon()}
+                        <HugeiconsIcon icon={ChevronDownIcon} size={18} />
+                    {/snippet}
+                </Button>
+            {/if}
+        </div>
+
+        {#if isSessionExpanded}
+            <div transition:slide class="mt-3 pt-3 border-t border-gray-100 flex flex-col gap-3 animate-in fade-in duration-200">
+                <div class="flex justify-between text-xs text-gray-600">
+                    <span>IP Address:</span>
+                    <span class="font-mono text-gray-900">{content.item.ipAddress || '127.0.0.1'}</span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-600">
+                    <span>Last Active:</span>
+                    <span class="font-mono text-gray-900">4 Hours ago</span>
+                </div>
+                <Button color="alternative" size="md">
+                    {#snippet icon()}<HugeiconsIcon icon={Logout01Icon} size={16} />{/snippet}
+                    Logout Device
+                </Button>
+            </div>
+        {/if}
+    </Card>
   {/if}
 {/if}
-
-<style>
-  f {
-    color: #439a42  }
-</style>

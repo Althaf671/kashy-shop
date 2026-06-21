@@ -1,6 +1,7 @@
-import { messages, type TGetMySessionListResponse, type TPatchMyProfileRequest } from "$lib";
+import { messages, statusCodes, type TGetMySessionListResponse, type TPatchMyProfileRequest } from "$lib";
 import { getMySessionListAsync, patchMyProfileAsync } from "$lib/server/features/user/user.service";
-import { TOAST_TYPE, type TFormErrors } from "$lib/types/global/ui.types";
+import { TOAST_TYPE } from "$lib/types/global/ui.types";
+import { parseErrorDescription } from "$lib/utils/errorParser";
 import { getOptionalFile, getOptionalString } from "$lib/utils/form";
 import type { RequestEvent } from "./$types";
 import { fail, type Actions } from "@sveltejs/kit";
@@ -45,24 +46,31 @@ export const actions: Actions = {
         };
 
         const result = await patchMyProfileAsync(data)
-        if (result.isFailure)  {
-            const description = result.error.description 
-            const fieldError = description ? description.split(',').map(desc => desc.trim()) : []
-            return fail(400, { 
+        if (result.isFailure) {
+            const { code, description } = result.error;
+
+            if (code === statusCodes.VALIDATION_ERROR) {
+                return fail(400, {
+                    success: false,
+                    errors: parseErrorDescription(description) 
+                });
+            }
+
+            return fail(400, {
                 success: false,
-                errors: {
-                    name: fieldError.find(err => err.startsWith('name')),
-                    email: fieldError.find(err => err.startsWith('email')),
-                    phone: fieldError.find(err => err.startsWith('phone')),
-                    birthdayAt: fieldError.find(err => err.startsWith('birthdayAt')),
-                    biography: fieldError.find(err => err.startsWith('biography')),
-                    quote: fieldError.find(err => err.startsWith('quote')),
-                    profileBanner: fieldError.find(err => err.startsWith('profileBanner')),
-                    avatarPicture: fieldError.find(err => err.startsWith('avatarPicture')),
-                } as TFormErrors
+                reactiveToast: {
+                    type: TOAST_TYPE.ERROR,
+                    message: description 
+                }
             });
         }
 
-        return { success: true };
+        return { 
+            success: true,
+            reactiveToast: {
+                type: TOAST_TYPE.SUCCESS,
+                message: result.value.message
+            } 
+        }
     }
 }

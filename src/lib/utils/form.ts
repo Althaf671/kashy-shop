@@ -1,6 +1,9 @@
+/**
+ * @returns value && value.trim() !== "" ? value : undefined
+ */
 export function getOptionalString(formData: FormData, key: string) {
     const value = formData.get(key) as string;
-    return value && value.trim() !== "" ? value : undefined;
+    return value && value.trim() !== "" ? value : undefined
 }
 
 export function getOptionalFile(formData: FormData, key: string) {
