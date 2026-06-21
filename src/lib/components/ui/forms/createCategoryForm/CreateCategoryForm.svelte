@@ -7,6 +7,7 @@
 	import FormField from "../../formField/FormField.svelte";
 	import Modal from "../../modal/Modal.svelte";
 	import Button from "../../button/Button.svelte";
+	import { fileToObjectUrl } from "$lib/utils/cropImage";
 
 
     // ─── Props ────────────────────────────────────────────────────────────────
@@ -43,10 +44,6 @@
     let cropFileName = $state('')
     let cropAspect = $state(1)
     let cropShape = $state<'rect' | 'round'>('round')
-
-    function fileToObjectUrl(file: File): string {
-        return URL.createObjectURL(file)
-    }
 
     function handleThumbnailChange(e: Event) {
         const input = e.currentTarget as HTMLInputElement
@@ -148,7 +145,6 @@
         disabled={updating}
         rows={8}
     >
-        {#snippet icon()}<GridOutline />{/snippet}
     </FormField>
 
     <!-- thumbnail pciture -->

@@ -44,7 +44,7 @@
         </Heading>
 
         <div class="flex items-center gap-3 w-full md:w-auto justify-start md:justify-end flex-wrap">
-            <Button variant="primary" class="w-[120px]" onclick={() => openDrawer('create-category-form', 'Bring your art collection to shop.')}>
+            <Button variant="primary" class="w-[120px]" onclick={() => openDrawer('create-category-form', 'Bring your art collection to public.')}>
                 {#snippet icon()}<GridPlusSolid class="h-4.5 w-4.5" />{/snippet}
                 Category
             </Button>

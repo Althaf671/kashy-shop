@@ -1,26 +1,29 @@
 <script lang="ts">
     /**
      * @file FormField.svelte
-     * @description A universal, reusable form field component built with raw HTML,
-     * Tailwind CSS, and Svelte 5 runes. Replaces all Flowbite Input/Label/Helper
-     * usage across the app. Supports text, email, tel, date, textarea, and file
-     * (with optional crop-mode callback). Zero external UI dependencies.
+     * @description Universal form field component — raw HTML, Tailwind, Svelte 5.
+     * Supports text, email, tel, password, date, textarea, file (single & multi),
+     * and honeypot. Zero Flowbite dependency.
      *
-     * @example — text with icon
+     * --- Multi-file usage (new) ---
+     * @example
      * <FormField
-     *   label="Fullname"
-     *   id="name"
-     *   name="name"
-     *   type="text"
-     *   placeholder="Kashley Vanrogoue"
-     *   bind:value={nameValue}
-     *   error={formErrors?.name}
+     *   label="Product Images"
+     *   id="productImages"
+     *   name="productImages"
+     *   type="file"
+     *   accept=".jpg,.png,.jpeg"
+     *   multiple
+     *   maxFiles={5}
+     *   hint="Up to 5 images. PNG, JPG or JPEG."
+     *   onFileChange={handleProductImagesChange}
+     *   croppedFiles={croppedFiles}
+     *   error={formErrors?.productImages}
      *   disabled={updating}
-     * >
-     *   {#snippet icon()}<UserIcon />{/snippet}
-     * </FormField>
+     * />
      *
-     * @example — file with crop
+     * --- Single-file usage (unchanged) ---
+     * @example
      * <FormField
      *   label="Avatar Picture"
      *   id="avatarPicture"
@@ -44,94 +47,97 @@
         /** Visible label text rendered above the field. */
         label,
 
-        /** HTML `id` attribute — ties the <label> to the input via `for`. */
+        /** HTML `id` — ties `<label for>` to the input. */
         id,
 
-        /** HTML `name` attribute used when the field is inside a <form>. */
+        /** HTML `name` — used in form submission. */
         name,
 
         /**
-         * Input type. Accepted values:
-         * - `'text'` | `'email'` | `'tel'` | `'password'` — single-line inputs
-         * - `'date'`  — native date picker
-         * - `'textarea'` — multi-line text area
-         * - `'file'`  — file picker (renders a styled button, hides native input)
-         * - `'honeypot'` — visually hidden spam-trap field
+         * Input type.
+         * - `'text'` | `'email'` | `'tel'` | `'password'` — single-line
+         * - `'date'`     — native date picker
+         * - `'textarea'` — multi-line
+         * - `'file'`     — file picker (single or multi via `multiple` prop)
+         * - `'honeypot'` — off-screen spam trap
          * @default 'text'
          */
         type = 'text',
 
-        /**
-         * Bound string value for text-like inputs (`text`, `email`, `tel`,
-         * `password`, `date`). Not used for `file` or `textarea`.
-         */
+        /** Bound value for single-line inputs and date. */
         value = $bindable(''),
 
-        /**
-         * Bound string value specifically for `textarea` type.
-         * Kept separate so the parent can bind independently.
-         */
+        /** Bound value for `type="textarea"`. Kept separate to avoid prop collision. */
         textareaValue = $bindable(''),
 
-        /** Placeholder text shown inside the input when empty. */
+        /** Placeholder text. */
         placeholder = '',
 
         /**
-         * Validation error message. When truthy the field border turns red
-         * and the message is rendered below the input in red.
+         * Validation error. Truthy → red border + message below.
          * @default null
          */
         error = null as string | null | undefined,
 
-        /**
-         * Hint / helper text rendered below the input in gray.
-         * Shown only when `error` is falsy.
-         */
+        /** Helper text shown in gray below the input. Hidden when `error` is truthy. */
         hint = '' as string,
 
-        /**
-         * Whether the field is non-interactive. Applies `disabled` to the
-         * underlying input and mutes its visual appearance.
-         * @default false
-         */
+        /** Disables all interaction and mutes visual appearance. @default false */
         disabled = false,
 
-        /**
-         * Number of visible rows for `type="textarea"`.
-         * @default 3
-         */
+        /** Visible row count for `type="textarea"`. @default 3 */
         rows = 3,
 
-        /**
-         * `accept` attribute forwarded to the hidden `<input type="file">`.
-         * E.g. `".jpg,.png,.jpeg"`
-         */
+        /** File MIME / extension filter. E.g. `".jpg,.png,.jpeg"`. */
         accept = '',
 
         /**
-         * Bindable `FileList` for `type="file"`. Bind this in the parent to
-         * read which files the user selected (after optional crop processing).
+         * Allows picking multiple files at once.
+         * When true, the trigger button label reflects the count of croppedFiles.
+         * @default false
+         */
+        multiple = false,
+
+        /**
+         * Maximum number of files allowed when `multiple=true`.
+         * Shown in the hint if provided.
+         * @default 5
+         */
+        maxFiles = 5,
+
+        /**
+         * Bindable FileList for single-file mode.
+         * Not used in multi-file mode — use `croppedFiles` instead.
          */
         files = $bindable(null as FileList | null),
 
         /**
-         * Bindable ref to the hidden `<input type="file">` element.
-         * The parent needs this to programmatically set `.files` after cropping.
+         * Bindable ref to the hidden `<input type="file">`.
+         * Parent injects the cropped FileList here after crop completes.
          */
         inputRef = $bindable(null as HTMLInputElement | null),
 
         /**
-         * Callback fired when the user picks a file (`type="file"` only).
-         * Receives the native `Event` so the parent can open the crop modal,
-         * revoke object URLs, etc.
+         * For multi-file mode: the array of already-cropped File objects.
+         * FormField uses this only for display (label + chip list).
+         * The parent manages this array entirely.
+         */
+        croppedFiles = [] as File[],
+
+        /**
+         * Callback fired on file input `change`.
+         * - Single mode: parent opens crop modal for the one file.
+         * - Multi mode: parent receives all files, builds crop queue.
          */
         onFileChange = null as ((e: Event) => void) | null,
 
         /**
-         * Optional Svelte 5 snippet rendered as a leading icon inside the
-         * input. Should render a single SVG icon element.
-         * Not applicable for `date`, `textarea`, or `file` types.
+         * Multi-file only: called when the user wants to remove a
+         * specific already-cropped file by index.
          */
+        onRemoveFile = null as ((index: number) => void) | null,
+
+        /** Optional leading icon snippet for single-line inputs. */
         icon = undefined as Snippet | undefined,
 
         /** Extra Tailwind classes forwarded to the outermost wrapper `<div>`. */
@@ -149,55 +155,64 @@
         disabled?: boolean;
         rows?: number;
         accept?: string;
+        multiple?: boolean;
+        maxFiles?: number;
         files?: FileList | null;
         inputRef?: HTMLInputElement | null;
+        croppedFiles?: File[];
         onFileChange?: ((e: Event) => void) | null;
+        onRemoveFile?: ((index: number) => void) | null;
         icon?: Snippet;
         class?: string;
     } = $props();
 
     // ─── Derived ──────────────────────────────────────────────────────────────
 
-    /** Display name for the chosen file, or fallback placeholder. */
-    const fileLabel = $derived(
-        files && files.length > 0 ? files[0].name : `Choose ${label.toLowerCase()}`
-    );
-
     const hasError = $derived(!!error);
 
-    // ─── Shared class builders ────────────────────────────────────────────────
-
     /**
-     * Base classes shared by all input-like elements.
-     * Border color reacts to the `error` prop.
+     * Label shown inside the file trigger button.
+     * - Multi mode: shows count of cropped files vs max, e.g. "2 / 5 images selected"
+     * - Single mode: shows filename or fallback placeholder
      */
+    const fileLabel = $derived(
+        multiple
+            ? croppedFiles.length > 0
+                ? `${croppedFiles.length} / ${maxFiles} images selected`
+                : `Choose up to ${maxFiles} images`
+            : files && files.length > 0
+                ? files[0].name
+                : `Choose ${label.toLowerCase()}`
+    );
+
+    /** Whether the file trigger button should be disabled. */
+    const fileTriggerDisabled = $derived(
+        disabled || (multiple && croppedFiles.length >= maxFiles)
+    );
+
+    // ─── Shared class builder ─────────────────────────────────────────────────
+
     const baseInputClass = $derived([
-        // Layout & spacing
         'w-full px-3.5 py-2.5 text-sm',
-        // Shape
         'rounded-xl',
-        // Background & text
-        'bg-gray-50 text-gray-900 placeholder:text-gray-400',
-        // Border
+        'bg-gray-100 text-gray-900 placeholder:text-gray-400',
         'border',
         hasError ? 'border-red-400' : 'border-gray-200',
-        // Outline / focus ring
         'outline-none transition-all duration-150',
         hasError
-            ? 'focus:ring-2 focus:ring-red-400/90 focus:border-red-400'
-            : 'focus:ring-2 focus:ring-[#996087]/90 focus:border-[#996087]',
-        // Disabled state
+            ? 'focus:ring-2 focus:ring-red-400/20 focus:border-red-400'
+            : 'focus:ring-2 focus:ring-[#996087]/20 focus:border-[#996087]',
         'disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed',
     ].join(' '));
 </script>
 
-<!-- ─── Honeypot (visually hidden spam trap) ─────────────────────────────── -->
+<!-- ─── Honeypot ─────────────────────────────────────────────────────────── -->
 {#if type === 'honeypot'}
     <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
         <input {id} {name} type="text" tabindex="-1" autocomplete="off" />
     </div>
 
-<!-- ─── All visible field types ─────────────────────────────────────────── -->
+<!-- ─── Visible fields ───────────────────────────────────────────────────── -->
 {:else}
     <div class={customClass}>
 
@@ -213,7 +228,6 @@
         {#if type === 'text' || type === 'email' || type === 'tel' || type === 'password'}
             <div class="relative flex items-center">
                 {#if icon}
-                    <!-- Leading icon wrapper — absolutely positioned inside padding -->
                     <span class="pointer-events-none absolute left-3.5 flex items-center text-gray-400">
                         {@render icon()}
                     </span>
@@ -254,26 +268,42 @@
 
         <!-- ── File ── -->
         {:else if type === 'file'}
-            <!-- Hidden native file input — programmatically triggered -->
-            <input
-                {id}
-                {name}
-                type="file"
-                {accept}
-                {disabled}
-                bind:this={inputRef}
-                bind:files
-                onchange={onFileChange ?? undefined}
-                class="sr-only"
-                tabindex="-1"
-                aria-hidden="true"
-            />
-
-            <!-- Visible styled trigger button -->
+            <!-- Hidden native file input -->
+            {#if multiple}
+                <input
+                    {id}
+                    {name}
+                    type="file"
+                    {accept}
+                    {disabled}
+                    multiple={multiple}
+                    bind:this={inputRef}
+                    onchange={onFileChange ?? undefined}
+                    class="sr-only"
+                    tabindex="-1"
+                    aria-hidden="true"
+                />
+            {:else}
+                <input
+                    {id}
+                    {name}
+                    type="file"
+                    {accept}
+                    {disabled}
+                    multiple={multiple}
+                    bind:this={inputRef}
+                    bind:files
+                    onchange={onFileChange ?? undefined}
+                    class="sr-only"
+                    tabindex="-1"
+                    aria-hidden="true"
+                />
+            {/if}
+            <!-- Styled trigger button -->
             <button
                 type="button"
                 onclick={() => inputRef?.click()}
-                {disabled}
+                disabled={fileTriggerDisabled}
                 aria-label="Choose {label}"
                 class="
                     w-full flex items-center gap-3 px-3.5 py-2.5 text-sm text-left
@@ -287,7 +317,7 @@
                 <!-- Upload icon -->
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="h-4.5 w-4.5 shrink-0 text-gray-700"
+                    class="h-4.5 w-4.5 shrink-0 text-gray-400"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -298,18 +328,46 @@
                         d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
                     />
                 </svg>
-                <span class="truncate {files && files.length > 0 ? 'text-gray-900' : 'text-gray-400'}">
+                <span class="truncate {(multiple ? croppedFiles.length > 0 : files && files.length > 0) ? 'text-gray-900' : 'text-gray-400'}">
                     {fileLabel}
                 </span>
             </button>
+
+            <!-- ── Multi-file chip list ── -->
+            {#if multiple && croppedFiles.length > 0}
+                <ul class="mt-2 flex flex-col gap-1" aria-label="Selected images">
+                    {#each croppedFiles as file, i (file)}
+                        <li class="flex items-center justify-between gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700">
+                            <!-- File icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="flex-1 truncate">{file.name}</span>
+                            <!-- Remove button -->
+                            {#if onRemoveFile && !disabled}
+                                <button
+                                    type="button"
+                                    onclick={() => onRemoveFile?.(i)}
+                                    aria-label="Remove {file.name}"
+                                    class="shrink-0 text-gray-400 hover:text-red-500 transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            {/if}
+                        </li>
+                    {/each}
+                </ul>
+            {/if}
         {/if}
 
-        <!-- Hint text (shown when no error) -->
+        <!-- Hint -->
         {#if hint && !hasError}
             <p class="mt-1 text-xs text-gray-400">{hint}</p>
         {/if}
 
-        <!-- Error message -->
+        <!-- Error -->
         {#if hasError}
             <p class="mt-1.5 text-xs text-red-500">{error}</p>
         {/if}

@@ -51,7 +51,7 @@ export const CreateProductScheme = z.object({
     categoryId: z.uuid("You did not input a valid UUID."), 
 })
 export type TCreateProductRequest = z.infer<typeof CreateProductScheme>
-export type TCreateProductResponse = { id: string; slug: string; } 
+export type TCreateProductResponse = { id: string; slug: string; message: string; } 
 
 //--- update by id -------------------------------
 export const UpdateProductByIdScheme = z.object({

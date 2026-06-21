@@ -155,4 +155,11 @@ export type TFormErrors = {
     description: string;
     thumbnailPicture: string;
     slug: string;
+
+    // product
+    productImages: string;
+    price: string;
+    stock: string;
+    type: string;
+    categoryId: string;
 };

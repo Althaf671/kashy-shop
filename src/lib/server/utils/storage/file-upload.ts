@@ -11,7 +11,7 @@ export async function uploadFileAsync(buffer: Buffer)
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
                     folder: FOLDER_NAME,
-                    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+                    transformation: [{ quality: 'auto', fetch_format: 'auto' }]
                 },
                 (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
                     if (error) {

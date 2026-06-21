@@ -1,6 +1,6 @@
 import { and, eq, ilike, or } from "drizzle-orm";
 import { categories, db, products } from "$lib/server/data";
-import { cleanupPreviousFileAsync, findSpecificErrorValues, processAndUploadMultiImagesAsync } from "$lib/server/utils";
+import { cleanupPreviousFileAsync, findSpecificErrorValues, processAndUploadMultiImagesAsync, type ErrorPair } from "$lib/server/utils";
 import { CreateProductScheme, type TCreateProductRequest, type TCreateProductResponse } from "$lib/types/features";
 import { Result, type TCloudinaryFile } from "$lib/types/global";
 import { messages, statusCodes } from "$lib/constants";
@@ -30,7 +30,7 @@ export async function createProductAsync(data: TCreateProductRequest)
         if (checkDuplicate.isFailure) return Result.failure(checkDuplicate.error)
        
         // compress and upload multiple images to storage
-        const multiMediaResult = await processAndUploadMultiImagesAsync(payload.thumbnailPicture, payload.images, 'default')
+        const multiMediaResult = await processAndUploadMultiImagesAsync(payload.thumbnailPicture, payload.images, 'square')
         if (multiMediaResult.isFailure) return Result.failure(multiMediaResult.error)
 
         const { thumbnailResult, imagesResult } = multiMediaResult.value
@@ -57,7 +57,8 @@ export async function createProductAsync(data: TCreateProductRequest)
 
         const response: TCreateProductResponse = {
             id: createdProduct.id,
-            slug: createdProduct.slug
+            slug: createdProduct.slug,
+            message: `Success adding ${createdProduct.name} to product catalog!`
         }
 
         return Result.success(response)
@@ -114,15 +115,17 @@ async function checkDuplicateSlugAndNameInCategoryAsync(categoryId: string, name
         .limit(1)
 
     if (isDuplicated) {
-        const specificReason = findSpecificErrorValues(
-            { ori: isDuplicated.categoryId, current: categoryId },
-            { ori: isDuplicated.name, current: name },
-            { ori: isDuplicated.slug, current: slug },
-        )
+        const pairsToCheck: ErrorPair<string>[] = [
+            { field: "category id", ori: isDuplicated.categoryId, current: categoryId },
+            { field: "slug", ori: isDuplicated.slug, current: slug },
+            { field: "name", ori: isDuplicated.name, current: name }
+        ];
+
+        const duplicate = findSpecificErrorValues(pairsToCheck);
 
         return Result.failure({
             code: statusCodes.DUPLICATED,
-            description: messages.DUPLICATED("Slug or Name", "value", specificReason),
+            description: messages.DUPLICATED("Category", duplicate!.field, duplicate!.current),
             domain: DOMAIN
         })
     }

@@ -7,6 +7,7 @@
 	import CreateCategoryForm from '../forms/createCategoryForm/CreateCategoryForm.svelte';
 	import { getDrawerTitle } from '$lib/utils/drawer';
 	import { drawer } from '$lib/stores/global/drawer.svelte';
+	import CreateProductForm from '../forms/createProductForm/CreateProductForm.svelte';
 
     // State props
     let { open = $bindable(), type }: { open: boolean, type: TDrawerType } = $props()
@@ -50,6 +51,8 @@
                 <PatchProfileForm bind:open={open} />
             {:else if type === 'create-category-form'}
                 <CreateCategoryForm bind:open={open} />
+            {:else if type === 'create-product-form'}
+                <CreateProductForm bind:open={open} />
             {/if}
         </div>
     </div>

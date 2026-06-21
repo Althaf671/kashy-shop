@@ -44,3 +44,29 @@ export async function getCroppedImg(imageSrc: string, pixelCrop: CropArea): Prom
         }, 'image/jpeg', 0.9);
     });
 }
+
+/**
+ * Converts a FileList (or null) into a plain File[] array.
+ * Used to populate the crop queue when user selects multiple files.
+ *
+ * @param fileList - The FileList from <input type="file" multiple>
+ * @returns Plain array of File objects, or empty array if null.
+ */
+export function filesToQueue(fileList: FileList | null): File[] {
+    if (!fileList || fileList.length === 0) return [];
+    return Array.from(fileList);
+}
+
+/**
+ * Creates a temporary object URL for a File to display in the crop modal.
+ *
+ * ⚠️ MEMORY CONTRACT: Caller MUST call URL.revokeObjectURL(url)
+ * after the URL is no longer needed, or the file stays in memory
+ * until page unload.
+ *
+ * @param file - The File to create an object URL for.
+ * @returns A blob: URL string.
+ */
+export function fileToObjectUrl(file: File): string {
+    return URL.createObjectURL(file);
+}
